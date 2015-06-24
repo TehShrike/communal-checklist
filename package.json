@@ -4,7 +4,9 @@
   "description": "Because all those other sites my wife is trying are a pain",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "watchify client/index.js -o static/build.js -d",
+    "build": "browserify client/index.js | uglifyjs -m > static/build.js"
   },
   "repository": {
     "type": "git",
@@ -15,5 +17,15 @@
   "bugs": {
     "url": "https://github.com/TehShrike/communal-checklist/issues"
   },
-  "homepage": "https://github.com/TehShrike/communal-checklist#readme"
+  "homepage": "https://github.com/TehShrike/communal-checklist#readme",
+  "devDependencies": {
+    "browserify": "^10.2.4",
+    "watchify": "^3.2.3"
+  },
+  "dependencies": {
+    "ecstatic": "^0.8.0",
+    "hash-brown-router": "^1.4.0",
+    "socket.io": "^1.3.5",
+    "socket.io-client": "^1.3.5"
+  }
 }
