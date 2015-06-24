@@ -1,0 +1,19 @@
+{
+  "name": "communal-checklist",
+  "version": "1.0.0",
+  "description": "Because all those other sites my wife is trying are a pain",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TehShrike/communal-checklist.git"
+  },
+  "author": "TehShrike",
+  "license": "WTFPL",
+  "bugs": {
+    "url": "https://github.com/TehShrike/communal-checklist/issues"
+  },
+  "homepage": "https://github.com/TehShrike/communal-checklist#readme"
+}
