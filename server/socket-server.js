@@ -24,12 +24,22 @@ function newItem() {
 	}
 }
 
+function noop() {}
+
+function cbFn(cb) {
+	return typeof cb === 'function' ? cb : noop
+}
+
 function getAndSave(listId, changerFn, cb) {
+	cb = cbFn(cb)
 	db.get(listId, function(err, value) {
 		if (err) {
 			cb(err)
 		} else {
-			db.put(listId, changerFn(value), cb)
+			var savedValue = changerFn(value)
+			db.put(listId, savedValue, function(err) {
+				cb(err, savedValue)
+			})
 		}
 	})
 }
@@ -40,10 +50,10 @@ function addItemAndReturnList(listId, editKey, cb) {
 			list.items.push(newItem())
 		}
 		return list
-	}, cb)
+	}, cbFn(cb))
 }
 
-function editItem(listId, editKey, itemId, item) {
+function editItem(listId, editKey, itemId, item, cb) {
 	getAndSave(listId, function(list) {
 		if (list.editKey === editKey) {
 			var storageItem = list.items.find(function(item) {
@@ -58,7 +68,7 @@ function editItem(listId, editKey, itemId, item) {
 		}
 
 		return list
-	})
+	}, cbFn(cb))
 }
 
 function checkItem(listId, itemId, checkedBy, cb) {
@@ -72,7 +82,7 @@ function checkItem(listId, itemId, checkedBy, cb) {
 		}
 
 		return items
-	}, cb)
+	}, cbFn(cb))
 }
 
 function unheckItem(listId, itemId, checkedBy, cb) {
@@ -92,25 +102,35 @@ function unheckItem(listId, itemId, checkedBy, cb) {
 		}
 
 		return list
-	}, cb)
+	}, cbFn(cb))
 }
 
 function saveNewList(cb) {
 	var list = newList()
 	db.put(list.id, list, function(err) {
-		cb(err, list)
+		cbFn(cb)(err, list)
 	})
 }
 
-function overwriteOther(listId, editKey, other, cb) {
+function overwriteListMetadata(listId, editKey, other, cb) {
 	getAndSave(listId, function(list) {
 		if (editKey === list.editKey) {
 			list.other = other
 		}
 		return list
-	}, cb)
+	}, cbFn(cb))
 }
 
-module.exports = function(io) {
+module.exports = function handleUserConnection(socket) {
+	socket.on('newList', saveNewList)
 
+	socket.on('newItem', addItemAndReturnList)
+
+	socket.on('editItem', editItem)
+
+	socket.on('checkItem', checkItem)
+
+	socket.on('unheckItem', unheckItem)
+
+	socket.on('overwriteListMetadata', overwriteListMetadata)
 }

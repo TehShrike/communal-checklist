@@ -1,6 +1,7 @@
 var http = require('http')
 var ecstatic = require('ecstatic')
 var socketio = require('socket.io')
+var socketHandler = require('server/socket-server')
 
 function makeServer() {
 	var server = http.createServer(
@@ -11,6 +12,8 @@ function makeServer() {
 	)
 
 	var io = socketio(server)
+
+	io.on('connection', socketHandler)
 
 	return server
 }
