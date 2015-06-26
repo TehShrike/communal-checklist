@@ -1,12 +1,13 @@
 var http = require('http')
 var ecstatic = require('ecstatic')
 var socketio = require('socket.io')
-var socketHandler = require('server/socket-server')
+var socketHandler = require('./socket-server')
+var path = require('path')
 
 function makeServer() {
 	var server = http.createServer(
 		ecstatic({
-			root: __dirname + '/static',
+			root: path.resolve(__dirname, '../static'),
 			cache: 0
 		})
 	)
@@ -19,5 +20,3 @@ function makeServer() {
 }
 
 module.exports = makeServer
-
-makeServer().listen(8080)

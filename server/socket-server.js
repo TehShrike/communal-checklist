@@ -2,7 +2,9 @@ require('array.prototype.find')
 require('array.prototype.findindex')
 
 var level = require('level-mem')
-var db = level('woot')
+var db = level('woot', {
+	valueEncoding: 'json'
+})
 var uuid = require('uuid-v4')
 
 function newList() {
@@ -114,23 +116,97 @@ function saveNewList(cb) {
 
 function overwriteListMetadata(listId, editKey, other, cb) {
 	getAndSave(listId, function(list) {
+		console.log('saving', listId)
 		if (editKey === list.editKey) {
+			console.log('edit key matched!')
 			list.other = other
 		}
 		return list
 	}, cbFn(cb))
 }
 
+function wrapCallbackWithBroadcast(socket, cb) {
+	return function(err, value) {
+		if (!err) {
+			socket.broadcast.to(listId).emit(message, value)
+		}
+
+		if (typeof cb === 'function') {
+			cb(err, value)
+		}
+	}
+}
+
+function getList(listId, cb) {
+	db.get(listId, function(err, list) {
+		if (err) {
+			cb(err.message)
+		} else {
+			delete list.editKey
+			cb(null, list)
+		}
+	})
+}
+
+function addAnotherCallback(args, withThisCallback) {
+	args = args.slice()
+	var originalCallback = args[args.length - 1]
+
+	function callbackToPassIn() {
+		console.log('silly callback called with', arguments)
+		try {
+			withThisCallback.apply(null, arguments)
+		} catch (e) {
+			console.error(e)
+		}
+		if (typeof originalCallback === 'function') {
+			originalCallback.apply(null, arguments)
+		}
+	}
+
+	if (typeof originalCallback === 'function') {
+		args[args.length - 1] = callbackToPassIn
+	} else {
+		args.push(callbackToPassIn)
+	}
+
+	console.log('new arguments', args)
+	return args
+}
+
+function returnSocketEventHandler(message, socket, fn) {
+	return function socketEventHandler() {
+		console.log('received message', message, arguments)
+		var args = Array.prototype.slice.call(arguments)
+		var listId = args[0]
+		console.log('ARG', args)
+		if (listId) {
+			fn.apply(null, addAnotherCallback(args, function(err, value) {
+				console.log('callback came back', value)
+				if (!err) {
+					socket.broadcast.to(listId).emit(message, value)
+				}
+			}))
+		}
+	}
+}
+
+function watchAndRebroadcastToList(message, socket, fn) {
+	socket.on(message, returnSocketEventHandler(message, socket, fn))
+}
+
 module.exports = function handleUserConnection(socket) {
 	socket.on('newList', saveNewList)
 
-	socket.on('newItem', addItemAndReturnList)
+	socket.on('getList', getList)
 
-	socket.on('editItem', editItem)
+	watchAndRebroadcastToList('newItem', socket, addItemAndReturnList)
 
-	socket.on('checkItem', checkItem)
+	watchAndRebroadcastToList('editItem', socket, editItem)
 
-	socket.on('unheckItem', unheckItem)
+	watchAndRebroadcastToList('checkItem', socket, checkItem)
 
-	socket.on('overwriteListMetadata', overwriteListMetadata)
+	watchAndRebroadcastToList('unheckItem', socket, unheckItem)
+
+	watchAndRebroadcastToList('overwriteListMetadata', socket, overwriteListMetadata)
 }

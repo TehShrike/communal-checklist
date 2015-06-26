@@ -1,0 +1,32 @@
+<div class="container">
+	<div class="row">
+		<div class="col-xs-offset-3 col-xs-6">
+			{{#error}}
+			<div class="alert alert-danger">
+				{{error}}
+			</div>
+			{{/error}}
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-xs-offset-2 col-xs-8">
+		{{#if editingName}}
+			<input type="text" class="listName" on-change="nameChange" value="{{list.other.name}}" placeholder="My awesome list" >
+		{{else}}
+			<h1 on-click="editName">{{list.other.name}}</h1>
+		{{/if}}
+		</div>
+		<div class="col-xs-offset-2 col-xs-8">
+			<ul>
+			{{#list.items}}
+				<li><a href="{{url}}">{{name}}</a></li>
+			{{/list.items}}
+			</ul>
+		</div>
+	</div>
+	<div class="row">
+		<label>Add a new
+	</div>
+
+</div>
