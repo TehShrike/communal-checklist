@@ -16,10 +16,10 @@ function newList() {
 	}
 }
 
-function newItem() {
+function newItem(name) {
 	return {
 		id: uuid(),
-		name: '',
+		name: name || '',
 		url: '',
 		checkedBy: [],
 		checkboxes: 1
@@ -46,13 +46,14 @@ function getAndSave(listId, changerFn, cb) {
 	})
 }
 
-function addItemAndReturnList(listId, editKey, cb) {
+function addItemAndReturnList(listId, editKey, name, cb) {
 	getAndSave(listId, function(list) {
 		if (list.editKey === editKey) {
-			list.items.push(newItem())
+			console.log('adding', name)
+			list.items.push(newItem(name))
 		}
 		return list
-	}, cbFn(cb))
+	}, cb)
 }
 
 function editItem(listId, editKey, itemId, item, cb) {
@@ -70,7 +71,7 @@ function editItem(listId, editKey, itemId, item, cb) {
 		}
 
 		return list
-	}, cbFn(cb))
+	}, cb)
 }
 
 function checkItem(listId, itemId, checkedBy, cb) {
@@ -84,7 +85,7 @@ function checkItem(listId, itemId, checkedBy, cb) {
 		}
 
 		return items
-	}, cbFn(cb))
+	}, cb)
 }
 
 function unheckItem(listId, itemId, checkedBy, cb) {
@@ -104,7 +105,7 @@ function unheckItem(listId, itemId, checkedBy, cb) {
 		}
 
 		return list
-	}, cbFn(cb))
+	}, cb)
 }
 
 function saveNewList(cb) {
@@ -122,7 +123,7 @@ function overwriteListMetadata(listId, editKey, other, cb) {
 			list.other = other
 		}
 		return list
-	}, cbFn(cb))
+	}, cb)
 }
 
 function wrapCallbackWithBroadcast(socket, cb) {

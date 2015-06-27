@@ -14,7 +14,11 @@
 		{{#if editingName}}
 			<input type="text" class="listName" on-change="nameChange" value="{{list.other.name}}" placeholder="My awesome list" >
 		{{else}}
-			<h1 on-click="editName">{{list.other.name}}</h1>
+			{{#if list}}
+				<h1 on-click="editName">{{list.other.name}}</h1>
+			{{else}}
+				<h1>...</h1>
+			{{/if}}
 		{{/if}}
 		</div>
 		<div class="col-xs-offset-2 col-xs-8">
@@ -25,8 +29,25 @@
 			</ul>
 		</div>
 	</div>
+
 	<div class="row">
-		<label>Add a new
+		<div class="col-xs-offset-2 col-xs-8">
+			<ul>
+
+			</ul>
+		</div>
 	</div>
 
+	{{#canEdit}}
+	<div class="row">
+		<div class="col-xs-offset-2 col-xs-8">
+			<label>Add a new checklist item</label>
+			<input type="text"
+					class="form-control"
+					placeholder="Kiss Josh"
+					value="{{newItemName}}"
+					on-change="newItem">
+		</div>
+	</div>
+	{{/canEdit}}
 </div>

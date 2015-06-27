@@ -1,33 +1,18 @@
 var Ractive = require('ractive')
-var template = require('fs').readFileSync('client/list.html', { encoding: 'utf8' })
+var listTemplate = require('fs').readFileSync('client/list.html', { encoding: 'utf8' })
 var socket = require('./socket')
 var router = require('./router')
 
 
 module.exports = function(listId, editKey) {
+	var canEdit = !!editKey
 	var ractive = new Ractive({
 		el: 'body',
-		template: template
+		template: listTemplate,
+		data: {
+			canEdit: canEdit
+		}
 	})
-
-	ractive.on('nameChange', function() {
-		ractive.set('editingName', false)
-		socket.emit('overwriteListMetadata', listId, editKey, ractive.get('list.other'), function(err, list) {
-			console.log(err, list)
-			if (err) {
-				ractive.set('error', err)
-			} else {
-				handleList(list)
-			}
-		})
-	})
-
-	function editName() {
-		ractive.set('editingName', true)
-		ractive.find('input.listName').select()
-	}
-
-	ractive.on('editName', editName)
 
 	function handleList(list) {
 		ractive.set('list', list)
@@ -36,13 +21,35 @@ module.exports = function(listId, editKey) {
 		}
 	}
 
-	socket.emit('getList', listId, function(err, list) {
+	function handleErrorOrList(err, list) {
 		if (err) {
 			ractive.set('error', err)
-			console.error(err)
 		} else {
-			console.log(list)
 			handleList(list)
 		}
+	}
+
+	ractive.on('nameChange', function() {
+		ractive.set('editingName', false)
+		socket.emit('overwriteListMetadata', listId, editKey, ractive.get('list.other'), handleErrorOrList)
 	})
+
+	ractive.on('newItem', function() {
+		var name = ractive.get('newItemName')
+		if (name) {
+			ractive.set('newItemName', '')
+			socket.emit('newItem', listId, editKey, name, handleErrorOrList)
+		}
+	})
+
+	function editName() {
+		if (canEdit) {
+			ractive.set('editingName', true)
+			ractive.find('input.listName').select()
+		}
+	}
+
+	ractive.on('editName', editName)
+
+	socket.emit('getList', listId, handleErrorOrList)
 }
