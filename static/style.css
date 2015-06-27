@@ -5,3 +5,8 @@
 body > .container {
 	padding-top: 15px;
 }
+
+table .checkbox {
+	margin-top: 0;
+	margin-bottom: 0;
+}
