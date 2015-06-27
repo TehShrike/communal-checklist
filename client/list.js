@@ -2,7 +2,7 @@ var Ractive = require('ractive')
 var listTemplate = require('fs').readFileSync('client/list.html', { encoding: 'utf8' })
 var socket = require('./socket')
 var router = require('./router')
-
+var copy = require('shallow-copy')
 
 module.exports = function(listId, editKey) {
 	var canEdit = !!editKey
@@ -15,6 +15,9 @@ module.exports = function(listId, editKey) {
 	})
 
 	function handleList(list) {
+		list.items.forEach(function(item) {
+			item.viewCheckbxes = transformListItemIntoCheckboxes(item)
+		})
 		ractive.set('list', list)
 		if (!list.other.name) {
 			editName()
@@ -52,4 +55,18 @@ module.exports = function(listId, editKey) {
 	ractive.on('editName', editName)
 
 	socket.emit('getList', listId, handleErrorOrList)
+}
+
+function transformListItemIntoCheckboxes(listItem) {
+	var checklist = listItem.checkedBy.map(function(checkedByName) {
+		return {
+			checkedBy: checkedByName
+		}
+	})
+
+	while (checklist.length < listItem.checkboxes) {
+		checklist.push({})
+	}
+
+	return checklist
 }

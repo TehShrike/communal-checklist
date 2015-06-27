@@ -11,30 +11,46 @@
 
 	<div class="row">
 		<div class="col-xs-offset-2 col-xs-8">
-		{{#if editingName}}
+		{{#editingName}}
 			<input type="text" class="listName" on-change="nameChange" value="{{list.other.name}}" placeholder="My awesome list" >
-		{{else}}
+		{{/editingName}}
+		{{^editingName}}
 			{{#if list}}
 				<h1 on-click="editName">{{list.other.name}}</h1>
 			{{else}}
 				<h1>...</h1>
 			{{/if}}
-		{{/if}}
-		</div>
-		<div class="col-xs-offset-2 col-xs-8">
-			<ul>
-			{{#list.items}}
-				<li><a href="{{url}}">{{name}}</a></li>
-			{{/list.items}}
-			</ul>
+		{{/editingName}}
 		</div>
 	</div>
 
 	<div class="row">
 		<div class="col-xs-offset-2 col-xs-8">
-			<ul>
-
-			</ul>
+			<table class="table">
+				<tbody>
+					{{#list.items}}
+						<tr>
+							<td>
+								Edit
+							</td>
+							<td>
+								{{#url}}
+									<a href="{{url}}">{{name}}</a>
+								{{else}}
+									{{name}}
+								{{/url}}
+							</td>
+							<td>
+								{{#viewCheckbxes}}
+									<div class="checkbox">
+										<input type="checkbox">
+									</div>
+								{{/viewCheckbxes}}
+							</td>
+						</tr>
+					{{/list.items}}
+				</tbody>
+			</table>
 		</div>
 	</div>
 
