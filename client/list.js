@@ -10,13 +10,22 @@ module.exports = function(listId, editKey) {
 		el: 'body',
 		template: listTemplate,
 		data: {
-			canEdit: canEdit
+			canEdit: canEdit,
+			currentName: 'Anonymous'
 		}
+	})
+
+	ractive.on('checkboxClicked', function(event) {
+		var checkbox = event.context
+		var checked = event.node.checked
+		var itemId = event.node.dataset.itemId
+		var name = ractive.get('currentName')
+		socket.emit(checked ? 'check' : 'uncheck', listId, itemId, checkbox.id, name, handleErrorOrList)
 	})
 
 	function handleList(list) {
 		list.items.forEach(function(item) {
-			item.viewCheckbxes = transformListItemIntoCheckboxes(item)
+			item.itemId = item.id
 		})
 		ractive.set('list', list)
 		if (!list.other.name) {
@@ -55,18 +64,4 @@ module.exports = function(listId, editKey) {
 	ractive.on('editName', editName)
 
 	socket.emit('getList', listId, handleErrorOrList)
-}
-
-function transformListItemIntoCheckboxes(listItem) {
-	var checklist = listItem.checkedBy.map(function(checkedByName) {
-		return {
-			checkedBy: checkedByName
-		}
-	})
-
-	while (checklist.length < listItem.checkboxes) {
-		checklist.push({})
-	}
-
-	return checklist
 }

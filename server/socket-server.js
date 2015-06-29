@@ -1,5 +1,9 @@
+var createMutex = require('read-write-lock')
+var KeyMaster = require('key-master')
 require('array.prototype.find')
 require('array.prototype.findindex')
+
+var listMutexes = KeyMaster(createMutex)
 
 var level = require('level-mem')
 var db = level('woot', {
@@ -21,8 +25,34 @@ function newItem(name) {
 		id: uuid(),
 		name: name || '',
 		url: '',
-		checkedBy: [],
-		checkboxes: 1
+		checkboxes: [ newCheckbox() ]
+	}
+}
+
+function newCheckbox() {
+	return {
+		checkedBy: null,
+		id: uuid()
+	}
+}
+
+function getItem(list, itemId) {
+	return list.items.find(function(item) {
+		return item.id === itemId
+	})
+}
+
+function getCheckbox(item, checkboxId) {
+	return item.checkboxes.find(function(checkbox) {
+		return checkbox.id = checkboxId
+	})
+}
+
+function getCheckboxFromList(list, itemId, checkboxId) {
+	var item = getItem(list, itemId)
+
+	if (item) {
+		return getCheckbox(item, checkboxId)
 	}
 }
 
@@ -33,24 +63,76 @@ function cbFn(cb) {
 }
 
 function getAndSave(listId, changerFn, cb) {
-	cb = cbFn(cb)
-	db.get(listId, function(err, value) {
-		if (err) {
-			cb(err)
-		} else {
-			var savedValue = changerFn(value)
-			db.put(listId, savedValue, function(err) {
-				cb(err, savedValue)
-			})
-		}
+	listMutexes.get(listId).writeLock(function(release) {
+		cb = cbFn(cb)
+		db.get(listId, function(err, value) {
+			if (err) {
+				release()
+				cb(err)
+			} else {
+				var savedValue = changerFn(value)
+				db.put(listId, savedValue, function(err) {
+					release()
+					cb(err, savedValue)
+				})
+			}
+		})
 	})
 }
 
-function addItemAndReturnList(listId, editKey, name, cb) {
+function addCheckbox(listId, editKey, cb) {
 	getAndSave(listId, function(list) {
 		if (list.editKey === editKey) {
-			console.log('adding', name)
-			list.items.push(newItem(name))
+			list.checkboxes.push(newCheckbox())
+		}
+		return list
+	}, cb)
+}
+
+function removeCheckbox(listId, editKey, cb) {
+	getAndSave(listId, function(list) {
+		if (list.checkboxes.length > 0 && list.editKey === editKey) {
+			var indexToRemove = list.checkboxes.findIndex(function(checkbox) {
+				return !checkbox.checkedBy
+			}) || list.checkboxes.length - 1
+
+			list.checkboxes.splice(indexToRemove, 1)
+		}
+		return list
+	})
+}
+
+function normalizeUserName(userName) {
+	return userName || 'Anonymous'
+}
+
+function check(listId, itemId, checkboxId, userName, cb) {
+	getAndSave(listId, function(list) {
+		var checkbox = getCheckboxFromList(list, itemId, checkboxId)
+		if (!checkbox.checkedBy) {
+			checkbox.checkedBy = normalizeUserName(userName)
+		}
+
+		return list
+	})
+}
+
+function uncheck(listId, itemId, checkboxId, userName, cb) {
+	getAndSave(listId, function(list) {
+		var checkbox = getCheckboxFromList(list, itemId, checkboxId)
+		if (checkbox.checkedBy === normalizeUserName(userName)) {
+			checkbox.checkedBy = null
+		}
+
+		return list
+	})
+}
+
+
+function addItemAndReturnList(listId, editKey, itemName, cb) {
+	getAndSave(listId, function(list) {
+		if (list.editKey === editKey) {
+			list.items.push(newItem(itemName))
 		}
 		return list
 	}, cb)
@@ -59,48 +141,12 @@ function addItemAndReturnList(listId, editKey, name, cb) {
 function editItem(listId, editKey, itemId, item, cb) {
 	getAndSave(listId, function(list) {
 		if (list.editKey === editKey) {
-			var storageItem = list.items.find(function(item) {
-				return item.id === itemId
-			})
+			var storageItem = getItem(list, itemId)
 
 			if (storageItem) {
 				storageItem.name = item.name
 				storageItem.url = item.url
 				storageItem.checkboxes = item.checkboxes
-			}
-		}
-
-		return list
-	}, cb)
-}
-
-function checkItem(listId, itemId, checkedBy, cb) {
-	getAndSave(listId, function(list) {
-		var item = items.find(function(item) {
-			return item.id === itemId
-		})
-
-		if (item.checkedBy.length < item.checkboxes) {
-			item.checkedBy.push(checkedBy)
-		}
-
-		return items
-	}, cb)
-}
-
-function unheckItem(listId, itemId, checkedBy, cb) {
-	getAndSave(listId, function(list) {
-		var item = list.items.find(function(item) {
-			return item.id === itemId
-		})
-
-		if (item) {
-			var indexToRemove = item.checkedBy.findIndex(function(name) {
-				return name.toLowerCase() === checkedBy.toLowerCase()
-			})
-
-			if (indexToRemove >= 0) {
-				item.checkedBy.splice(indexToRemove, 1)
 			}
 		}
 
@@ -117,9 +163,7 @@ function saveNewList(cb) {
 
 function overwriteListMetadata(listId, editKey, other, cb) {
 	getAndSave(listId, function(list) {
-		console.log('saving', listId)
 		if (editKey === list.editKey) {
-			console.log('edit key matched!')
 			list.other = other
 		}
 		return list
@@ -139,13 +183,16 @@ function wrapCallbackWithBroadcast(socket, cb) {
 }
 
 function getList(listId, cb) {
-	db.get(listId, function(err, list) {
-		if (err) {
-			cb(err.message)
-		} else {
-			delete list.editKey
-			cb(null, list)
-		}
+	listMutexes.get(listId).readLock(function(release) {
+		db.get(listId, function(err, list) {
+			release()
+			if (err) {
+				cb(err.message)
+			} else {
+				delete list.editKey
+				cb(null, list)
+			}
+		})
 	})
 }
 
@@ -154,7 +201,6 @@ function addAnotherCallback(args, withThisCallback) {
 	var originalCallback = args[args.length - 1]
 
 	function callbackToPassIn() {
-		console.log('silly callback called with', arguments)
 		try {
 			withThisCallback.apply(null, arguments)
 		} catch (e) {
@@ -171,19 +217,15 @@ function addAnotherCallback(args, withThisCallback) {
 		args.push(callbackToPassIn)
 	}
 
-	console.log('new arguments', args)
 	return args
 }
 
 function returnSocketEventHandler(message, socket, fn) {
 	return function socketEventHandler() {
-		console.log('received message', message, arguments)
 		var args = Array.prototype.slice.call(arguments)
 		var listId = args[0]
-		console.log('ARG', args)
 		if (listId) {
 			fn.apply(null, addAnotherCallback(args, function(err, value) {
-				console.log('callback came back', value)
 				if (!err) {
 					socket.broadcast.to(listId).emit(message, value)
 				}
@@ -201,13 +243,17 @@ module.exports = function handleUserConnection(socket) {
 
 	socket.on('getList', getList)
 
+	watchAndRebroadcastToList('addCheckbox', socket, addCheckbox)
+
+	watchAndRebroadcastToList('removeCheckbox', socket, removeCheckbox)
+
 	watchAndRebroadcastToList('newItem', socket, addItemAndReturnList)
 
 	watchAndRebroadcastToList('editItem', socket, editItem)
 
-	watchAndRebroadcastToList('checkItem', socket, checkItem)
+	watchAndRebroadcastToList('check', socket, check)
 
-	watchAndRebroadcastToList('unheckItem', socket, unheckItem)
+	watchAndRebroadcastToList('uncheck', socket, uncheck)
 
 	watchAndRebroadcastToList('overwriteListMetadata', socket, overwriteListMetadata)
 }

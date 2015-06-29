@@ -22,6 +22,13 @@
 			{{/if}}
 		{{/editingName}}
 		</div>
+
+		<div class="col-xs-2">
+			<label>
+				Who are you?
+			</label>
+			<input type="text" value="{{currentName}}">
+		</div>
 	</div>
 
 	<div class="row">
@@ -41,11 +48,15 @@
 								{{/url}}
 							</td>
 							<td>
-								{{#viewCheckbxes}}
+								{{#checkboxes}}
 									<div class="checkbox">
-										<input type="checkbox" disabled="{{false}}">
+										<input type="checkbox" data-item-id="{{itemId}}" on-change="checkboxClicked" checked="{{!!checkedBy}}">
 									</div>
-								{{/viewCheckbxes}}
+								{{/checkboxes}}
+							</td>
+							<td>
+								<i class="fa fa-minus-square-o" ng-click="addCheckbox"></i>
+								<i class="fa fa-plus-square-o" ng-click="removeCheckbox"></i>
 							</td>
 						</tr>
 					{{/list.items}}
