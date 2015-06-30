@@ -44,7 +44,7 @@ function getItem(list, itemId) {
 
 function getCheckbox(item, checkboxId) {
 	return item.checkboxes.find(function(checkbox) {
-		return checkbox.id = checkboxId
+		return checkbox.id === checkboxId
 	})
 }
 
@@ -80,26 +80,33 @@ function getAndSave(listId, changerFn, cb) {
 	})
 }
 
-function addCheckbox(listId, editKey, cb) {
+function addCheckbox(listId, itemId, editKey, cb) {
 	getAndSave(listId, function(list) {
-		if (list.editKey === editKey) {
-			list.checkboxes.push(newCheckbox())
+		var item = getItem(list, itemId)
+		if (list.editKey === editKey && item) {
+			item.checkboxes.push(newCheckbox())
 		}
 		return list
 	}, cb)
 }
 
-function removeCheckbox(listId, editKey, cb) {
+function removeCheckbox(listId, itemId, editKey, cb) {
 	getAndSave(listId, function(list) {
-		if (list.checkboxes.length > 0 && list.editKey === editKey) {
-			var indexToRemove = list.checkboxes.findIndex(function(checkbox) {
-				return !checkbox.checkedBy
-			}) || list.checkboxes.length - 1
+		var item = getItem(list, itemId)
 
-			list.checkboxes.splice(indexToRemove, 1)
+		if (item && item.checkboxes.length > 0 && list.editKey === editKey) {
+			var indexToRemove = item.checkboxes.findIndex(function(checkbox) {
+				return !checkbox.checkedBy
+			})
+
+			if (indexToRemove === -1) {
+				indexToRemove = item.checkboxes.length - 1
+			}
+			item.checkboxes.splice(indexToRemove, 1)
 		}
+
 		return list
-	})
+	}, cb)
 }
 
 function normalizeUserName(userName) {
@@ -224,6 +231,7 @@ function returnSocketEventHandler(message, socket, fn) {
 	return function socketEventHandler() {
 		var args = Array.prototype.slice.call(arguments)
 		var listId = args[0]
+
 		if (listId) {
 			fn.apply(null, addAnotherCallback(args, function(err, value) {
 				if (!err) {

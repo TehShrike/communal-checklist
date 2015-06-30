@@ -33,11 +33,11 @@
 
 	<div class="row">
 		<div class="col-xs-offset-2 col-xs-8">
-			<table class="table">
+			<table class="table table-striped">
 				<tbody>
 					{{#list.items}}
 						<tr>
-							<td>
+							<td class="col-edit">
 								Edit
 							</td>
 							<td>
@@ -47,16 +47,16 @@
 									{{name}}
 								{{/url}}
 							</td>
-							<td>
+							<td class="col-checkboxes">
 								{{#checkboxes}}
-									<div class="checkbox">
-										<input type="checkbox" data-item-id="{{itemId}}" on-change="checkboxClicked" checked="{{!!checkedBy}}">
-									</div>
+									<input type="checkbox" data-item-id="{{itemId}}" on-change="checkboxClicked" checked="{{!!checkedBy}}">
 								{{/checkboxes}}
 							</td>
-							<td>
-								<i class="fa fa-minus-square-o" ng-click="addCheckbox"></i>
-								<i class="fa fa-plus-square-o" ng-click="removeCheckbox"></i>
+							<td class="col-icons">
+								{{#canEdit}}
+									<i class="fa fa-minus-square-o" data-item-id="{{itemId}}" on-click="removeCheckbox"></i>
+									<i class="fa fa-plus-square-o" data-item-id="{{itemId}}" on-click="addCheckbox"></i>
+								{{/canEdit}}
 							</td>
 						</tr>
 					{{/list.items}}

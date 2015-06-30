@@ -20,6 +20,7 @@ module.exports = function(listId, editKey) {
 		var checked = event.node.checked
 		var itemId = event.node.dataset.itemId
 		var name = ractive.get('currentName')
+
 		socket.emit(checked ? 'check' : 'uncheck', listId, itemId, checkbox.id, name, handleErrorOrList)
 	})
 
@@ -52,6 +53,15 @@ module.exports = function(listId, editKey) {
 			ractive.set('newItemName', '')
 			socket.emit('newItem', listId, editKey, name, handleErrorOrList)
 		}
+	})
+
+	ractive.on('addCheckbox', function(event) {
+		var itemId = event.node.dataset.itemId
+		socket.emit('addCheckbox', listId, itemId, editKey, handleErrorOrList)
+	})
+	ractive.on('removeCheckbox', function(event) {
+		var itemId = event.node.dataset.itemId
+		socket.emit('removeCheckbox', listId, itemId, editKey, handleErrorOrList)
 	})
 
 	function editName() {
