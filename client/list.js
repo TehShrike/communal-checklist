@@ -64,6 +64,10 @@ module.exports = function(listId, editKey) {
 		socket.emit('removeCheckbox', listId, itemId, editKey, handleErrorOrList)
 	})
 
+	ractive.on('editItem', function() {
+		ractive.set('editingItem', true)
+	})
+
 	function editName() {
 		if (canEdit) {
 			ractive.set('editingName', true)
