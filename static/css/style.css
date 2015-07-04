@@ -12,7 +12,7 @@ table .checkbox {
 }
 
 .col-edit {
-	width: 75px;
+	width: 50px;
 }
 
 .col-icons {
@@ -21,4 +21,12 @@ table .checkbox {
 
 .col-checkboxes input[type="checkbox"] {
 	margin-right: 10px;
+}
+
+.cursor-pointer {
+	cursor: pointer;
+}
+
+.hide {
+	display: none;
 }

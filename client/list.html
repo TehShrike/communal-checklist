@@ -11,13 +11,17 @@
 
 	<div class="row">
 		<div class="col-xs-offset-2 col-xs-8">
-		{{#if editingName}}
-			<input type="text" class="listName" on-change="nameChange" value="{{list.other.name}}" placeholder="My awesome list" >
-		{{elseif list.other.name}}
-			<h1 on-click="editName">{{list.other.name}}</h1>
-		{{else}}
-			<h1 on-click="editName">...</h1>
-		{{/if}}
+			{{#if editingName}}
+				<input type="text"
+						class="listName"
+						on-change="nameChange"
+						value="{{list.other.name}}"
+						placeholder="My awesome list" >
+			{{elseif list.other.name}}
+				<h1 on-click="editName">{{list.other.name}}</h1>
+			{{else}}
+				<h1 on-click="editName">...</h1>
+			{{/if}}
 		</div>
 
 		<div class="col-xs-2">
@@ -34,28 +38,36 @@
 				<tbody>
 					{{#list.items}}
 						<tr>
-							<td class="col-edit" on-click="editUrl">
-								Edit URL
+							<td class="col-edit">
+								{{#editingItem}}
+									Editing!
+								{{else}}
+									<a
+											on-click="editItem"
+											class="{{^canEdit}}hide{{/canEdit}} cursor-pointer">
+										Edit
+									</a>
+								{{/editingItem}}
 							</td>
 							<td>
-								{{#editingUrl || editingTitle}}
-									{{#editingUrl}}
-										<input type="text" on-change="changeUrl" value="{{url}}">
-									{{/editingUrl}}
-									{{#editingTitle}}
-										<input type="text" on-change="changeName" value="{{name}}">
-									{{/editingTitle}}
+								{{#editingItem}}
+									<input type="text" on-change="changeName" value="{{name}}" placeholder="Do cool thing">
+									<input type="text" on-change="changeUrl" value="{{url}}" placeholder="http://amazon.com/butts">
 								{{else}}
 									{{#url}}
 										<a href="{{url}}">{{name}}</a>
 									{{else}}
 										{{name}}
 									{{/url}}
-								{{/editingUrl || editingTitle}}
+								{{/editingItem}}
 							</td>
 							<td class="col-checkboxes">
 								{{#checkboxes}}
-									<input type="checkbox" data-item-id="{{itemId}}" on-change="checkboxClicked" checked="{{!!checkedBy}}">
+									<input type="checkbox"
+											data-item-id="{{itemId}}"
+											on-change="checkboxClicked"
+											disabled="{{checkedBy && checkedBy !== currentName}}"
+											checked="{{!!checkedBy}}">
 								{{/checkboxes}}
 							</td>
 							<td class="col-icons">
