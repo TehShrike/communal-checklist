@@ -15,6 +15,7 @@
 				<input type="text"
 						class="listName"
 						on-change="nameChange"
+						on-blur="nameKillFocus"
 						value="{{list.other.name}}"
 						placeholder="My awesome list" >
 			{{elseif list.other.name}}
@@ -40,7 +41,11 @@
 						<tr>
 							<td class="col-edit">
 								{{#editingItem}}
-									Editing!
+									<button
+											class="btn btn-primary btn-xs"
+											on-click="saveItem">
+										Save
+									</button>
 								{{else}}
 									<a
 											on-click="editItem"
@@ -51,8 +56,8 @@
 							</td>
 							<td>
 								{{#editingItem}}
-									<input type="text" on-change="changeName" value="{{name}}" placeholder="Do cool thing">
-									<input type="text" on-change="changeUrl" value="{{url}}" placeholder="http://amazon.com/butts">
+									<input type="text" on-change="saveItem" value="{{name}}" placeholder="Do cool thing">
+									<input type="text" on-change="saveItem" value="{{url}}" placeholder="http://amazon.com/butts">
 								{{else}}
 									{{#url}}
 										<a href="{{url}}">{{name}}</a>
@@ -67,6 +72,7 @@
 											data-item-id="{{itemId}}"
 											on-change="checkboxClicked"
 											disabled="{{checkedBy && checkedBy !== currentName}}"
+											title="{{canEdit ? checkedBy : ''}}"
 											checked="{{!!checkedBy}}">
 								{{/checkboxes}}
 							</td>

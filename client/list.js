@@ -15,15 +15,6 @@ module.exports = function(listId, editKey) {
 		}
 	})
 
-	ractive.on('checkboxClicked', function(event) {
-		var checkbox = event.context
-		var checked = event.node.checked
-		var itemId = event.node.dataset.itemId
-		var name = ractive.get('currentName')
-
-		socket.emit(checked ? 'check' : 'uncheck', listId, itemId, checkbox.id, name, handleErrorOrList)
-	})
-
 	function handleList(list) {
 		list.items.forEach(function(item) {
 			item.itemId = item.id
@@ -42,9 +33,22 @@ module.exports = function(listId, editKey) {
 		}
 	}
 
+	ractive.on('checkboxClicked', function(event) {
+		var checkbox = event.context
+		var checked = event.node.checked
+		var itemId = event.node.dataset.itemId
+		var name = ractive.get('currentName')
+
+		socket.emit(checked ? 'check' : 'uncheck', listId, itemId, checkbox.id, name, handleErrorOrList)
+	})
+
 	ractive.on('nameChange', function() {
 		ractive.set('editingName', false)
 		socket.emit('overwriteListMetadata', listId, editKey, ractive.get('list.other'), handleErrorOrList)
+	})
+
+	ractive.on('nameKillFocus', function() {
+		ractive.set('editingName', false)
 	})
 
 	ractive.on('newItem', function() {
@@ -64,18 +68,34 @@ module.exports = function(listId, editKey) {
 		socket.emit('removeCheckbox', listId, itemId, editKey, handleErrorOrList)
 	})
 
-	ractive.on('editItem', function() {
+	ractive.on('editItem', function(event) {
 		ractive.set('editingItem', true)
 	})
 
-	function editName() {
+	ractive.on('saveItem', function(event) {
+		var item = event.context
+		socket.emit('editItem', listId, editKey, item.id, item)
+		ractive.set('editingItem', false)
+	})
+
+	ractive.on('save', function() {
+		var itemId = event.node.dataset.itemId
+		if (itemId) {
+			var item = ractive.get('list').items.find(function(item) {
+				return item.id === itemId
+			})
+			if (item) {
+				socket.emit('editItem', listId, editKey, item)
+			}
+		}
+	})
+
+	ractive.on('editName', function editName() {
 		if (canEdit) {
 			ractive.set('editingName', true)
 			ractive.find('input.listName').select()
 		}
-	}
-
-	ractive.on('editName', editName)
+	})
 
 	socket.emit('getList', listId, handleErrorOrList)
 }
