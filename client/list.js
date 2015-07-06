@@ -29,29 +29,43 @@ module.exports = function(listId, editKey) {
 		}
 	})
 
-	function editName() {
-		if (canEdit) {
-			ractive.set('editingName', true)
-			ractive.find('input.listName').select()
-		}
-	}
-
 	function handleList(list) {
-		list.items.forEach(function(item) {
+
+		list.items.forEach(function(item, index) {
 			item.itemId = item.id
+			item.checkboxes.forEach(function(checkbox) {
+				checkbox.checked = !!checkbox.checkedBy
+			})
 		})
+
 		ractive.set('list', list)
-		if (!list.other.name) {
-			editName()
-		}
 	}
 
 	function handleErrorOrList(err, list) {
-		if (err) {
+		if (err && list) {
+			ractive.set('warning', err)
+		} else if (err) {
 			ractive.set('error', err)
-		} else {
+		}
+
+		// Concurrency errors send back a correct copy of the list
+		if (list) {
 			handleList(list)
 		}
+	}
+
+	function emitListChange() {
+		ractive.set('error', null)
+		ractive.set('warning', null)
+		var args = Array.prototype.slice.call(arguments)
+		args.splice(1, 0, listId, currentVersion())
+		ractive.set('list.version', currentVersion() + 1) // It's called "optimistic" concurrency for a reason
+		args.push(handleErrorOrList)
+		socket.emit.apply(socket, args)
+	}
+
+	function currentVersion() {
+		return ractive.get('list.version')
 	}
 
 	ractive.on('changeUserName', function() {
@@ -64,12 +78,13 @@ module.exports = function(listId, editKey) {
 		var itemId = event.node.dataset.itemId
 		var name = ractive.get('currentName')
 
-		socket.emit(checked ? 'check' : 'uncheck', listId, itemId, checkbox.id, name, handleErrorOrList)
+		emitListChange(checked ? 'check' : 'uncheck', itemId, checkbox.id, name)
 	})
 
 	ractive.on('nameChange', function() {
 		ractive.set('editingName', false)
-		socket.emit('overwriteListMetadata', listId, editKey, ractive.get('list.other'), handleErrorOrList)
+
+		emitListChange('overwriteListMetadata', editKey, ractive.get('list.other'))
 	})
 
 	ractive.on('nameKillFocus', function() {
@@ -80,17 +95,17 @@ module.exports = function(listId, editKey) {
 		var name = ractive.get('newItemName')
 		if (name) {
 			ractive.set('newItemName', '')
-			socket.emit('newItem', listId, editKey, name, handleErrorOrList)
+			emitListChange('newItem', editKey, name)
 		}
 	})
 
 	ractive.on('addCheckbox', function(event) {
 		var itemId = event.node.dataset.itemId
-		socket.emit('addCheckbox', listId, itemId, editKey, handleErrorOrList)
+		emitListChange('addCheckbox', itemId, editKey)
 	})
 	ractive.on('removeCheckbox', function(event) {
 		var itemId = event.node.dataset.itemId
-		socket.emit('removeCheckbox', listId, itemId, editKey, handleErrorOrList)
+		emitListChange('removeCheckbox', itemId, editKey)
 	})
 
 	ractive.on('editItem', function(event) {
@@ -99,29 +114,36 @@ module.exports = function(listId, editKey) {
 
 	ractive.on('saveItem', function(event) {
 		var item = event.context
-		socket.emit('editItem', listId, editKey, item.id, item)
+		emitListChange('editItem', editKey, item.id, item)
 		ractive.set('editingItem', false)
 	})
 
-	ractive.on('save', function() {
-		var itemId = event.node.dataset.itemId
-		if (itemId) {
-			var item = ractive.get('list').items.find(function(item) {
-				return item.id === itemId
-			})
-			if (item) {
-				socket.emit('editItem', listId, editKey, item)
-			}
+	ractive.on('editName', editName.bind(null, ractive))
+
+	socket.emit('getList', listId, function(err, list) {
+		handleErrorOrList(err, list)
+		if (!err) {
+			onLoad(ractive)
 		}
 	})
+}
 
-	ractive.on('editName', editName)
-
-	socket.emit('getList', listId, handleErrorOrList)
-
+function onLoad(ractive) {
 	if (ractive.get('currentName') === 'Anonymous') {
-		var el = ractive.find('.current-name')
-		el.focus()
-		el.select()
+		if (list.other.name) {
+			var el = ractive.find('.current-name')
+			el.focus()
+			el.select()
+		} else {
+			editName(ractive)
+		}
 	}
 }
+
+function editName(ractive) {
+	if (ractive.get('canEdit')) {
+		ractive.set('editingName', true)
+		ractive.find('input.listName').select()
+	}
+}
+

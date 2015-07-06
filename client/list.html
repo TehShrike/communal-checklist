@@ -7,98 +7,108 @@
 			</div>
 			{{/error}}
 		</div>
-	</div>
-
-	<div class="row">
-		<div class="col-xs-offset-2 col-xs-8">
-			{{#if editingName}}
-				<input type="text"
-						class="listName"
-						on-change="nameChange"
-						on-blur="nameKillFocus"
-						value="{{list.other.name}}"
-						placeholder="My awesome list" >
-			{{elseif list.other.name}}
-				<h1 on-click="editName">{{list.other.name}}</h1>
-			{{else}}
-				<h1 on-click="editName">...</h1>
-			{{/if}}
-		</div>
-
-		<div class="col-xs-2">
-			<label class="{{#if currentName == 'Anonymous'}}text-danger{{/if}}">
-				Who are you?
-			</label>
-			<input type="text" class="current-name" on-change="changeUserName" value="{{currentName}}" autofocus>
+		<div class="col-xs-offset-3 col-xs-6">
+			{{#warning}}
+			<div class="alert alert-warning">
+				{{warning}}
+			</div>
+			{{/warning}}
 		</div>
 	</div>
 
-	<div class="row">
-		<div class="col-xs-offset-2 col-xs-8">
-			<table class="table table-striped">
-				<tbody>
-					{{#list.items}}
-						<tr>
-							<td class="col-edit">
-								{{#editingItem}}
-									<button
-											class="btn btn-primary btn-xs"
-											on-click="saveItem">
-										Save
-									</button>
-								{{else}}
-									<a
-											on-click="editItem"
-											class="{{^canEdit}}hide{{/canEdit}} cursor-pointer">
-										Edit
-									</a>
-								{{/editingItem}}
-							</td>
-							<td>
-								{{#editingItem}}
-									<input type="text" on-change="saveItem" value="{{name}}" placeholder="Do cool thing">
-									<input type="text" on-change="saveItem" value="{{url}}" placeholder="http://amazon.com/butts">
-								{{else}}
-									{{#url}}
-										<a href="{{url}}">{{name}}</a>
+	{{#list}}
+
+		<div class="row">
+			<div class="col-xs-offset-2 col-xs-8">
+				{{#if editingName}}
+					<input type="text"
+							class="listName"
+							on-change="nameChange"
+							on-blur="nameKillFocus"
+							value="{{list.other.name}}"
+							placeholder="My awesome list" >
+				{{elseif list.other.name}}
+					<h1 on-click="editName">{{list.other.name}}</h1>
+				{{else}}
+					<h1 on-click="editName">...</h1>
+				{{/if}}
+			</div>
+
+			<div class="col-xs-2">
+				<label class="{{#if currentName == 'Anonymous'}}text-danger{{/if}}">
+					Who are you?
+				</label>
+				<input type="text" class="current-name" on-change="changeUserName" value="{{currentName}}" autofocus>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-xs-offset-2 col-xs-8">
+				<table class="table table-striped">
+					<tbody>
+						{{#list.items}}
+							<tr>
+								<td class="col-edit">
+									{{#editingItem}}
+										<button
+												class="btn btn-primary btn-xs"
+												on-click="saveItem">
+											Save
+										</button>
 									{{else}}
-										{{name}}
-									{{/url}}
-								{{/editingItem}}
-							</td>
-							<td class="col-checkboxes">
-								{{#checkboxes}}
-									<input type="checkbox"
-											data-item-id="{{itemId}}"
-											on-change="checkboxClicked"
-											disabled="{{checkedBy && checkedBy !== currentName}}"
-											title="{{canEdit ? checkedBy : ''}}"
-											checked="{{!!checkedBy}}">
-								{{/checkboxes}}
-							</td>
-							<td class="col-icons">
-								{{#canEdit}}
-									<i class="fa fa-minus-square-o" data-item-id="{{itemId}}" on-click="removeCheckbox"></i>
-									<i class="fa fa-plus-square-o" data-item-id="{{itemId}}" on-click="addCheckbox"></i>
-								{{/canEdit}}
-							</td>
-						</tr>
-					{{/list.items}}
-				</tbody>
-			</table>
+										<a
+												on-click="editItem"
+												class="{{^canEdit}}hide{{/canEdit}} cursor-pointer">
+											Edit
+										</a>
+									{{/editingItem}}
+								</td>
+								<td>
+									{{#editingItem}}
+										<input type="text" on-change="saveItem" value="{{name}}" placeholder="Do cool thing">
+										<input type="text" on-change="saveItem" value="{{url}}" placeholder="http://amazon.com/butts">
+									{{else}}
+										{{#url}}
+											<a href="{{url}}">{{name}}</a>
+										{{else}}
+											{{name}}
+										{{/url}}
+									{{/editingItem}}
+								</td>
+								<td class="col-checkboxes">
+									{{#checkboxes}}
+										<input type="checkbox"
+												data-item-id="{{itemId}}"
+												on-change="checkboxClicked"
+												disabled="{{checkedBy && checkedBy !== currentName}}"
+												title="{{canEdit ? checkedBy : ''}}"
+												checked="{{checked}}">
+									{{/checkboxes}}
+								</td>
+								<td class="col-icons">
+									{{#canEdit}}
+										<i class="fa fa-minus-square-o" data-item-id="{{itemId}}" on-click="removeCheckbox"></i>
+										<i class="fa fa-plus-square-o" data-item-id="{{itemId}}" on-click="addCheckbox"></i>
+									{{/canEdit}}
+								</td>
+							</tr>
+						{{/list.items}}
+					</tbody>
+				</table>
+			</div>
 		</div>
-	</div>
 
-	{{#canEdit}}
-	<div class="row">
-		<div class="col-xs-offset-2 col-xs-8">
-			<label>Add a new checklist item</label>
-			<input type="text"
-					class="form-control"
-					placeholder="Kiss Josh"
-					value="{{newItemName}}"
-					on-change="newItem">
+		{{#canEdit}}
+		<div class="row">
+			<div class="col-xs-offset-2 col-xs-8">
+				<label>Add a new checklist item</label>
+				<input type="text"
+						class="form-control"
+						placeholder="Kiss Josh"
+						value="{{newItemName}}"
+						on-change="newItem">
+			</div>
 		</div>
-	</div>
-	{{/canEdit}}
+		{{/canEdit}}
+	{{/list}}
 </div>

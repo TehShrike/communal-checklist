@@ -4,8 +4,8 @@ require('array.prototype.find')
 require('array.prototype.findindex')
 var levelup = require('levelup')
 var uuid = require('uuid-v4')
-var storage = require('leveldown')
-// var storage = require('memdown')
+// var storage = require('leveldown')
+var storage = require('memdown')
 
 var listMutexes = KeyMaster(createMutex)
 
@@ -19,7 +19,8 @@ function newList() {
 		id: uuid(),
 		editKey: uuid(),
 		items: [],
-		other: {}
+		other: {},
+		version: 0
 	}
 }
 
@@ -65,26 +66,39 @@ function cbFn(cb) {
 	return typeof cb === 'function' ? cb : noop
 }
 
-function getAndSave(listId, changerFn, cb) {
+function newError(message, type) {
+	var err = new Error(message)
+	err[type] = true
+	return err
+}
+
+function getAndSave(listId, version, changerFn, cb) {
 	listMutexes.get(listId).writeLock(function(release) {
 		cb = cbFn(cb)
-		db.get(listId, function(err, value) {
-			if (err) {
-				release()
-				cb(err)
-			} else {
-				var savedValue = changerFn(value)
-				db.put(listId, savedValue, function(err) {
+		db.get(listId, function(err, list) {
+			setTimeout(function() {
+				if (err) {
 					release()
-					cb(err, savedValue)
-				})
-			}
+					cb(err.message)
+				} else if (typeof list.version === 'number' && list.version !== version) {
+					release()
+					cb('Someone else beat you to saving the list', list)
+				} else {
+					var newVersion = (list.version || 0) + 1
+					var savedList = changerFn(list)
+					savedList.version = newVersion
+					db.put(listId, savedList, function(err) {
+						release()
+						cb(err && err.message, savedList)
+					})
+				}
+			}, 2000)
 		})
 	})
 }
 
-function addCheckbox(listId, itemId, editKey, cb) {
-	getAndSave(listId, function(list) {
+function addCheckbox(listId, version, itemId, editKey, cb) {
+	getAndSave(listId, version, function(list) {
 		var item = getItem(list, itemId)
 		if (list.editKey === editKey && item) {
 			item.checkboxes.push(newCheckbox())
@@ -93,8 +107,8 @@ function addCheckbox(listId, itemId, editKey, cb) {
 	}, cb)
 }
 
-function removeCheckbox(listId, itemId, editKey, cb) {
-	getAndSave(listId, function(list) {
+function removeCheckbox(listId, version, itemId, editKey, cb) {
+	getAndSave(listId, version, function(list) {
 		var item = getItem(list, itemId)
 
 		if (item && item.checkboxes.length > 0 && list.editKey === editKey) {
@@ -116,31 +130,31 @@ function normalizeUserName(userName) {
 	return userName || 'Anonymous'
 }
 
-function check(listId, itemId, checkboxId, userName, cb) {
-	getAndSave(listId, function(list) {
+function check(listId, version, itemId, checkboxId, userName, cb) {
+	getAndSave(listId, version, function(list) {
 		var checkbox = getCheckboxFromList(list, itemId, checkboxId)
 		if (!checkbox.checkedBy) {
 			checkbox.checkedBy = normalizeUserName(userName)
 		}
 
 		return list
-	})
+	}, cb)
 }
 
-function uncheck(listId, itemId, checkboxId, userName, cb) {
-	getAndSave(listId, function(list) {
+function uncheck(listId, version, itemId, checkboxId, userName, cb) {
+	getAndSave(listId, version, function(list) {
 		var checkbox = getCheckboxFromList(list, itemId, checkboxId)
 		if (checkbox.checkedBy === normalizeUserName(userName)) {
 			checkbox.checkedBy = null
 		}
 
 		return list
-	})
+	}, cb)
 }
 
 
-function addItemAndReturnList(listId, editKey, itemName, cb) {
-	getAndSave(listId, function(list) {
+function addItemAndReturnList(listId, version, editKey, itemName, cb) {
+	getAndSave(listId, version, function(list) {
 		if (list.editKey === editKey) {
 			list.items.push(newItem(itemName))
 		}
@@ -148,8 +162,8 @@ function addItemAndReturnList(listId, editKey, itemName, cb) {
 	}, cb)
 }
 
-function editItem(listId, editKey, itemId, item, cb) {
-	getAndSave(listId, function(list) {
+function editItem(listId, version, editKey, itemId, item, cb) {
+	getAndSave(listId, version, function(list) {
 		if (list.editKey === editKey) {
 			var storageItem = getItem(list, itemId)
 
@@ -167,12 +181,12 @@ function editItem(listId, editKey, itemId, item, cb) {
 function saveNewList(cb) {
 	var list = newList()
 	db.put(list.id, list, function(err) {
-		cbFn(cb)(err, list)
+		cbFn(cb)(err && err.message, list)
 	})
 }
 
-function overwriteListMetadata(listId, editKey, other, cb) {
-	getAndSave(listId, function(list) {
+function overwriteListMetadata(listId, version, editKey, other, cb) {
+	getAndSave(listId, version, function(list) {
 		if (editKey === list.editKey) {
 			list.other = other
 		}
@@ -187,7 +201,7 @@ function wrapCallbackWithBroadcast(socket, cb) {
 		}
 
 		if (typeof cb === 'function') {
-			cb(err, value)
+			cb(err && err.message, value)
 		}
 	}
 }

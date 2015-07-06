@@ -11,7 +11,6 @@ module.exports = function() {
 
 	ractive.on('createList', function() {
 		socket.emit('newList', function(err, list) {
-			console.log(err, list)
 			if (err) {
 				ractive.set('error', err.message)
 			} else {
