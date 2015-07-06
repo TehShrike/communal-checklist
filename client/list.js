@@ -3,6 +3,12 @@ var listTemplate = require('fs').readFileSync('client/list.html', { encoding: 'u
 var socket = require('./socket')
 var router = require('./router')
 var copy = require('shallow-copy')
+var levelup = require('levelup')
+var storage = require('localstorage-down')
+
+var db = levelup('communal-checklist', {
+	db: storage
+})
 
 module.exports = function(listId, editKey) {
 	var canEdit = !!editKey
@@ -14,6 +20,21 @@ module.exports = function(listId, editKey) {
 			currentName: 'Anonymous'
 		}
 	})
+
+	db.get('currentName', function(err, currentName) {
+		if (!err) {
+			ractive.set('currentName', currentName)
+		} else if (!err.notFound) {
+			throw err
+		}
+	})
+
+	function editName() {
+		if (canEdit) {
+			ractive.set('editingName', true)
+			ractive.find('input.listName').select()
+		}
+	}
 
 	function handleList(list) {
 		list.items.forEach(function(item) {
@@ -32,6 +53,10 @@ module.exports = function(listId, editKey) {
 			handleList(list)
 		}
 	}
+
+	ractive.on('changeUserName', function() {
+		db.put('currentName', ractive.get('currentName'))
+	})
 
 	ractive.on('checkboxClicked', function(event) {
 		var checkbox = event.context
@@ -90,12 +115,13 @@ module.exports = function(listId, editKey) {
 		}
 	})
 
-	ractive.on('editName', function editName() {
-		if (canEdit) {
-			ractive.set('editingName', true)
-			ractive.find('input.listName').select()
-		}
-	})
+	ractive.on('editName', editName)
 
 	socket.emit('getList', listId, handleErrorOrList)
+
+	if (ractive.get('currentName') === 'Anonymous') {
+		var el = ractive.find('.current-name')
+		el.focus()
+		el.select()
+	}
 }

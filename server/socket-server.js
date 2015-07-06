@@ -2,14 +2,17 @@ var createMutex = require('read-write-lock')
 var KeyMaster = require('key-master')
 require('array.prototype.find')
 require('array.prototype.findindex')
+var levelup = require('levelup')
+var uuid = require('uuid-v4')
+var storage = require('leveldown')
+// var storage = require('memdown')
 
 var listMutexes = KeyMaster(createMutex)
 
-var level = require('level-mem')
-var db = level('woot', {
+var db = levelup('./mydb', {
+	db: storage,
 	valueEncoding: 'json'
 })
-var uuid = require('uuid-v4')
 
 function newList() {
 	return {

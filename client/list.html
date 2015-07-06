@@ -26,10 +26,10 @@
 		</div>
 
 		<div class="col-xs-2">
-			<label>
+			<label class="{{#if currentName == 'Anonymous'}}text-danger{{/if}}">
 				Who are you?
 			</label>
-			<input type="text" value="{{currentName}}">
+			<input type="text" class="current-name" on-change="changeUserName" value="{{currentName}}" autofocus>
 		</div>
 	</div>
 
