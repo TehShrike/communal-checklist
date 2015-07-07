@@ -192,18 +192,6 @@ function overwriteListMetadata(listId, version, editKey, other, cb) {
 	}, cb)
 }
 
-function wrapCallbackWithBroadcast(socket, cb) {
-	return function(err, value) {
-		if (!err) {
-			socket.broadcast.to(listId).emit(message, value)
-		}
-
-		if (typeof cb === 'function') {
-			cb(err && err.message, value)
-		}
-	}
-}
-
 function getList(listId, cb) {
 	listMutexes.get(listId).readLock(function(release) {
 		db.get(listId, function(err, list) {
@@ -242,7 +230,7 @@ function addAnotherCallback(args, withThisCallback) {
 	return args
 }
 
-function returnSocketEventHandler(message, socket, fn) {
+function returnSocketEventHandler(socket, fn) {
 	return function socketEventHandler() {
 		var args = Array.prototype.slice.call(arguments)
 		var listId = args[0]
@@ -250,7 +238,7 @@ function returnSocketEventHandler(message, socket, fn) {
 		if (listId) {
 			fn.apply(null, addAnotherCallback(args, function(err, value) {
 				if (!err) {
-					socket.broadcast.to(listId).emit(message, value)
+					socket.broadcast.to(listId).emit('change', value)
 				}
 			}))
 		}
@@ -258,13 +246,16 @@ function returnSocketEventHandler(message, socket, fn) {
 }
 
 function watchAndRebroadcastToList(message, socket, fn) {
-	socket.on(message, returnSocketEventHandler(message, socket, fn))
+	socket.on(message, returnSocketEventHandler(socket, fn))
 }
 
 module.exports = function handleUserConnection(socket) {
 	socket.on('newList', saveNewList)
 
-	socket.on('getList', getList)
+	socket.on('getList', function(listId, cb) {
+		socket.join(listId)
+		getList(listId, cb)
+	})
 
 	watchAndRebroadcastToList('addCheckbox', socket, addCheckbox)
 

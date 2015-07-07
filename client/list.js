@@ -125,6 +125,12 @@ module.exports = function(listId, editKey) {
 			onLoad(ractive)
 		}
 	})
+
+	socket.on('change', function(list) {
+		if (list.id === listId) {
+			handleList(list)
+		}
+	})
 }
 
 function onLoad(ractive) {
