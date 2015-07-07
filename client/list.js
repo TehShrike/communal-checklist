@@ -18,7 +18,8 @@ module.exports = function(listId, editKey) {
 		data: {
 			canEdit: canEdit,
 			currentName: 'Anonymous',
-			newItemName: ''
+			newItemName: '',
+			shareUrl: window.location.origin + window.location.pathname + '#/list/' + listId
 		}
 	})
 
