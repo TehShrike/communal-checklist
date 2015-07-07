@@ -1,6 +1,7 @@
 var home = require('./home')
 var list = require('./list')
 var router = require('./router')
+require('ractive').DEBUG = false
 
 router.add('/home', home)
 
