@@ -3,13 +3,13 @@ var KeyMaster = require('key-master')
 require('array.prototype.find')
 require('array.prototype.findindex')
 var levelup = require('levelup')
-var uuid = require('uuid-v4')
-// var storage = require('leveldown')
-var storage = require('memdown')
+var uuid = require('random-uuid-v4')
+var storage = require('leveldown')
+// var storage = require('memdown')
 
 var listMutexes = KeyMaster(createMutex)
 
-var db = levelup('./mydb', {
+var db = levelup('./leveldb-storage', {
 	db: storage,
 	valueEncoding: 'json'
 })
