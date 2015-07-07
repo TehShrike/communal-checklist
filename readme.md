@@ -2,7 +2,7 @@ All the gift registry apps my wife tried out looked pretty horrible, so I made t
 
 ## To do
 
-- "share" link for owners
 - store edit keys in localstorage?
 - allow owners to uncheck people's checks?
 - deploy
+- home page

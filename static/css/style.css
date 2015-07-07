@@ -38,3 +38,7 @@ table .checkbox {
 .margin-top-minus-5 {
 	margin-top: -5px;
 }
+
+td.col-checkboxes input[type="checkbox"][disabled] {
+	cursor: inherit;
+}

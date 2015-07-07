@@ -19,10 +19,10 @@
 	{{#list}}
 
 		<div class="row">
-			<div class="col-xs-offset-2 col-xs-8">
+			<div class="col-xs-8">
 				{{#if editingName}}
 					<input type="text"
-							class="listName"
+							class="listName form-control"
 							on-change="nameChange"
 							on-blur="nameKillFocus"
 							value="{{list.other.name}}"
@@ -34,16 +34,23 @@
 				{{/if}}
 			</div>
 
-			<div class="col-xs-2">
-				<label class="{{#if currentName == 'Anonymous'}}text-danger{{/if}}">
-					Who are you?
-				</label>
-				<input type="text" class="current-name" on-change="changeUserName" value="{{currentName}}" autofocus>
+			<div class="col-xs-4">
+				<div>
+					<label class="{{#if currentName == 'Anonymous'}}text-danger{{/if}} control-label">
+						Who are you?
+					</label>
+					<input type="text" class="current-name form-control" on-change="changeUserName" value="{{currentName}}">
+				</div>
+
+				<div>
+					<label class="control-label">Share:</label>
+					<input type="text" class="form-control" decorator="selectOnFocus" value="{{shareUrl}}" readonly>
+				</div>
 			</div>
 		</div>
 
 		<div class="row">
-			<div class="col-xs-offset-2 col-xs-8">
+			<div class="col-xs-8">
 				<table class="table table-striped">
 					<tbody>
 						{{#list.items}}
@@ -106,8 +113,8 @@
 
 		{{#canEdit}}
 		<div class="row">
-			<div class="col-xs-offset-2 col-xs-8">
-				<label>Add a new checklist item</label>
+			<div class="col-xs-8">
+				<label class="control-label">Add a new checklist item</label>
 				<input type="text"
 						class="form-control"
 						placeholder="Pantaloons"

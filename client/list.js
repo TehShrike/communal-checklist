@@ -5,6 +5,7 @@ var router = require('./router')
 var copy = require('shallow-copy')
 var levelup = require('levelup')
 var storage = require('localstorage-down')
+Ractive.decorators.selectOnFocus = require('ractive-select-on-focus')
 
 var db = levelup('communal-checklist', {
 	db: storage
@@ -141,14 +142,10 @@ module.exports = function(listId, editKey) {
 }
 
 function onLoad(ractive) {
-	if (ractive.get('currentName') === 'Anonymous') {
-		if (list.other.name) {
-			var el = ractive.find('.current-name')
-			el.focus()
-			el.select()
-		} else {
-			editName(ractive)
-		}
+	if (!ractive.get('list.other.name')) {
+		editName(ractive)
+	} else if (ractive.get('currentName') === 'Anonymous') {
+		ractive.find('.current-name').select()
 	}
 }
 
