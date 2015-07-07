@@ -76,23 +76,21 @@ function getAndSave(listId, version, changerFn, cb) {
 	listMutexes.get(listId).writeLock(function(release) {
 		cb = cbFn(cb)
 		db.get(listId, function(err, list) {
-			setTimeout(function() {
-				if (err) {
+			if (err) {
+				release()
+				cb(err.message)
+			} else if (typeof list.version === 'number' && list.version !== version) {
+				release()
+				cb('Someone else beat you to saving the list', list)
+			} else {
+				var newVersion = (list.version || 0) + 1
+				var savedList = changerFn(list)
+				savedList.version = newVersion
+				db.put(listId, savedList, function(err) {
 					release()
-					cb(err.message)
-				} else if (typeof list.version === 'number' && list.version !== version) {
-					release()
-					cb('Someone else beat you to saving the list', list)
-				} else {
-					var newVersion = (list.version || 0) + 1
-					var savedList = changerFn(list)
-					savedList.version = newVersion
-					db.put(listId, savedList, function(err) {
-						release()
-						cb(err && err.message, savedList)
-					})
-				}
-			}, 2000)
+					cb(err && err.message, savedList)
+				})
+			}
 		})
 	})
 }

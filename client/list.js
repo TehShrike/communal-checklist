@@ -59,7 +59,6 @@ module.exports = function(listId, editKey) {
 		ractive.set('warning', null)
 		var args = Array.prototype.slice.call(arguments)
 		args.splice(1, 0, listId, currentVersion())
-		ractive.set('list.version', currentVersion() + 1) // It's called "optimistic" concurrency for a reason
 		args.push(handleErrorOrList)
 		socket.emit.apply(socket, args)
 	}
