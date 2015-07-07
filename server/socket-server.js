@@ -160,6 +160,22 @@ function addItemAndReturnList(listId, version, editKey, itemName, cb) {
 	}, cb)
 }
 
+function removeItem(listId, version, editKey, itemId, cb) {
+	getAndSave(listId, version, function(list) {
+		if (list.editKey === editKey) {
+			var index = list.items.findIndex(function(item) {
+				return item.id === itemId
+			})
+
+			if (index !== -1) {
+				list.items.splice(index, 1)
+			}
+		}
+
+		return list
+	}, cb)
+}
+
 function editItem(listId, version, editKey, itemId, item, cb) {
 	getAndSave(listId, version, function(list) {
 		if (list.editKey === editKey) {
@@ -262,6 +278,8 @@ module.exports = function handleUserConnection(socket) {
 	watchAndRebroadcastToList('removeCheckbox', socket, removeCheckbox)
 
 	watchAndRebroadcastToList('newItem', socket, addItemAndReturnList)
+
+	watchAndRebroadcastToList('removeItem', socket, removeItem)
 
 	watchAndRebroadcastToList('editItem', socket, editItem)
 

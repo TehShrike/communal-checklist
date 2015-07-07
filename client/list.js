@@ -17,7 +17,8 @@ module.exports = function(listId, editKey) {
 		template: listTemplate,
 		data: {
 			canEdit: canEdit,
-			currentName: 'Anonymous'
+			currentName: 'Anonymous',
+			newItemName: ''
 		}
 	})
 
@@ -108,16 +109,21 @@ module.exports = function(listId, editKey) {
 	})
 
 	ractive.on('editItem', function(event) {
-		ractive.set('editingItem', true)
+		ractive.set(event.keypath + '.editingItem', true)
 	})
 
 	ractive.on('saveItem', function(event) {
 		var item = event.context
 		emitListChange('editItem', editKey, item.id, item)
-		ractive.set('editingItem', false)
+		ractive.set(event.keypath + '.editingItem', false)
 	})
 
 	ractive.on('editName', editName.bind(null, ractive))
+
+	ractive.on('removeItem', function(event) {
+		var itemId = event.node.dataset.itemId
+		emitListChange('removeItem', editKey, itemId)
+	})
 
 	socket.emit('getList', listId, function(err, list) {
 		handleErrorOrList(err, list)

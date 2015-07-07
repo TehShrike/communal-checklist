@@ -50,8 +50,9 @@
 							<tr>
 								<td class="col-edit">
 									{{#editingItem}}
+
 										<button
-												class="btn btn-primary btn-xs"
+												class="btn btn-primary btn-xs margin-top-minus-5"
 												on-click="saveItem">
 											Save
 										</button>
@@ -65,8 +66,10 @@
 								</td>
 								<td>
 									{{#editingItem}}
-										<input type="text" on-change="saveItem" value="{{name}}" placeholder="Do cool thing">
-										<input type="text" on-change="saveItem" value="{{url}}" placeholder="http://amazon.com/butts">
+										<div class="margin-bottom-minus-5 margin-top-minus-5">
+											<input type="text" on-change="saveItem" value="{{name}}" placeholder="Do cool thing">
+											<input type="text" on-change="saveItem" value="{{url}}" placeholder="http://amazon.com/butts">
+										</div>
 									{{else}}
 										{{#url}}
 											<a href="{{url}}">{{name}}</a>
@@ -89,6 +92,9 @@
 									{{#canEdit}}
 										<i class="fa fa-minus-square-o" data-item-id="{{itemId}}" on-click="removeCheckbox"></i>
 										<i class="fa fa-plus-square-o" data-item-id="{{itemId}}" on-click="addCheckbox"></i>
+										{{#editingItem}}
+											<i class="fa fa-trash-o" data-item-id="{{itemId}}" on-click="removeItem"></i>
+										{{/editingItem}}
 									{{/canEdit}}
 								</td>
 							</tr>
@@ -104,7 +110,7 @@
 				<label>Add a new checklist item</label>
 				<input type="text"
 						class="form-control"
-						placeholder="Kiss Josh"
+						placeholder="Pantaloons"
 						value="{{newItemName}}"
 						on-change="newItem">
 			</div>

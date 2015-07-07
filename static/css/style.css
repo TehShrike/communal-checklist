@@ -16,7 +16,7 @@ table .checkbox {
 }
 
 .col-icons {
-	width: 50px;
+	width: 60px;
 }
 
 .col-checkboxes input[type="checkbox"] {
@@ -29,4 +29,12 @@ table .checkbox {
 
 .hide {
 	display: none;
+}
+
+.margin-bottom-minus-5 {
+	margin-bottom: -5px;
+}
+
+.margin-top-minus-5 {
+	margin-top: -5px;
 }
