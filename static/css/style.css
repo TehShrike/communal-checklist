@@ -42,3 +42,8 @@ table .checkbox {
 td.col-checkboxes input[type="checkbox"][disabled] {
 	cursor: inherit;
 }
+
+.gif-screenshot {
+	height: 160px;
+	width: 352px;
+}

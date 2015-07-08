@@ -3,6 +3,5 @@ All the gift registry apps my wife tried out looked pretty horrible, so I made t
 ## To do
 
 - store edit keys in localstorage?
-- allow owners to uncheck people's checks?
+- allow owners to uncheck other people's checks?
 - deploy
-- home page
