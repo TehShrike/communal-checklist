@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "watchify client/index.js -t brfs -o static/build.js -d",
     "build": "browserify client/index.js -t brfs | uglifyjs -m > static/build.js",
-    "server": "node server.js"
+    "start": "npm run build && node server.js"
   },
   "repository": {
     "type": "git",
