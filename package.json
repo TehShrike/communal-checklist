@@ -20,8 +20,6 @@
   },
   "homepage": "https://github.com/TehShrike/communal-checklist#readme",
   "devDependencies": {
-    "level-mem": "^0.18.0",
-    "watchify": "^3.2.3"
   },
   "dependencies": {
     "array.prototype.find": "^1.0.0",
