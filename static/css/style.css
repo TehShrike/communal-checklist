@@ -31,8 +31,20 @@ table .checkbox {
 	display: none;
 }
 
+.margin-left-10 {
+	margin-left: 10px;
+}
+
 .margin-bottom-minus-5 {
 	margin-bottom: -5px;
+}
+
+.margin-bottom-0 {
+	margin-bottom: 0;
+}
+
+.margin-bottom-20 {
+	margin-bottom: 20px;
 }
 
 .margin-top-minus-5 {
@@ -47,3 +59,4 @@ td.col-checkboxes input[type="checkbox"][disabled] {
 	height: 160px;
 	width: 352px;
 }
+

@@ -18,30 +18,48 @@
 
 	{{#list}}
 
-		<div class="row">
-			<div class="col-xs-8">
-				{{#if editingName}}
-					<input type="text"
-							class="listName form-control"
-							on-change="nameChange"
-							on-blur="nameKillFocus"
-							value="{{list.other.name}}"
-							placeholder="My awesome list" >
-				{{elseif list.other.name}}
-					<h1 on-click="editName">{{list.other.name}}</h1>
-				{{else}}
-					<h1 on-click="editName">...</h1>
-				{{/if}}
+		<nav class="navbar navbar-inverse margin-bottom-0">
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<a class="navbar-brand" href="#/home">Communal Checklist</a>
+				</div>
 			</div>
+		</nav>
 
+		<div class="row">
+			<div class="col-xs-12">
+				<div class="page-header">
+					{{#if editingName}}
+						<input type="text"
+								class="listName form-control"
+								on-blur="nameKillFocus"
+								on-change="nameChange"
+								value="{{list.other.name}}"
+								placeholder="My awesome list" >
+					{{elseif list.other.name}}
+						<h1 on-click="editName">
+							{{list.other.name}} {{#canEdit}}<button class="btn btn-link btn-xs" on-click="editName">(edit)</button>{{/canEdit}}
+						</h1>
+					{{else}}
+						<h1 on-click="editName">
+							Unnamed list {{#canEdit}}<button class="btn btn-link btn-xs" on-click="editName">(edit name)</button>{{/canEdit}}
+						</h1>
+					{{/if}}
+				</div>
+			</div>
+		</div>
+
+		<div class="row margin-bottom-20">
 			<div class="col-xs-4">
 				<div>
-					<label class="{{#if currentName == 'Anonymous'}}text-danger{{/if}} control-label">
-						Who are you?
+					<label class="control-label">
+						Enter your name to remember which checks are yours
 					</label>
 					<input type="text" class="current-name form-control" on-change="changeUserName" value="{{currentName}}">
 				</div>
+			</div>
 
+			<div class="col-xs-4">
 				<div>
 					<label class="control-label">Share:</label>
 					<input type="text" class="form-control" decorator="selectOnFocus" value="{{shareUrl}}" readonly>
