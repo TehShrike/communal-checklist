@@ -24,14 +24,11 @@ function handleList(ractive, list) {
 		})
 	})
 
-	console.log('setting list to', list)
-
 	ractive.set('list', list)
 }
 
 module.exports = function(listId, editKey) {
 	function handleErrorOrList(err, list) {
-		console.log('got back err/list', err, list)
 		if (err && list) {
 			ractive.set('warning', err)
 		} else if (err) {
@@ -50,7 +47,7 @@ module.exports = function(listId, editKey) {
 		var args = Array.prototype.slice.call(arguments)
 		args.splice(1, 0, listId, ractive.get('list.version'))
 		args.push(handleErrorOrList)
-		console.log('emitting', args)
+
 		socket.emit.apply(socket, args)
 	}
 

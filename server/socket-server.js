@@ -101,13 +101,10 @@ function getAndSave(listId, version, changerFn, cb) {
 	listMutexes.get(listId).writeLock(function(release) {
 		cb = cbFn(cb)
 		db.get(listId, function(err, list) {
-			console.log('got list', err && err.message, list, 'trying to update with version', version)
 			if (err) {
-				console.log(err && err.message)
 				release()
 				cb(err.message)
 			} else if (typeof list.version === 'number' && list.version !== version) {
-				console.log('Someone else beat you to saving the list')
 				release()
 				cb('Someone else beat you to saving the list', list)
 			} else {
@@ -192,7 +189,6 @@ function addCategoryAndReturnList(listId, version, editKey, categoryName, cb) {
 }
 
 function editCategory(listId, version, categoryId, editKey, categoryName, cb) {
-	console.log('editCategory', arguments)
 	getAndSave(listId, version, function(list) {
 		if (list.editKey === editKey) {
 
@@ -202,15 +198,12 @@ function editCategory(listId, version, categoryId, editKey, categoryName, cb) {
 				category.name = categoryName
 			}
 		}
-		console.log('saving and returning', list)
 		return list
 	}, cb)
 }
 
 function addItemAndReturnList(listId, version, categoryId, editKey, itemName, cb) {
-	console.log('YO updating list', listId, 'and category', categoryId, 'version', version)
 	getAndSave(listId, version, function(list) {
-		console.log('eh?')
 		if (list.editKey === editKey) {
 			var category = getCategory(list, categoryId)
 
@@ -218,7 +211,7 @@ function addItemAndReturnList(listId, version, categoryId, editKey, itemName, cb
 				category.items.push(newItem(itemName))
 			}
 		}
-		console.log('saving and returning', list)
+
 		return list
 	}, cb)
 }
