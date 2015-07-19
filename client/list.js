@@ -1,10 +1,11 @@
 var Ractive = require('ractive')
-var listTemplate = require('fs').readFileSync('client/list.html', { encoding: 'utf8' })
-var socket = require('./socket')
-var router = require('./router')
 var copy = require('shallow-copy')
+
+var router = require('./router')
 var state = require('./client-state')
+
 Ractive.decorators.selectOnFocus = require('ractive-select-on-focus')
+var listTemplate = require('fs').readFileSync('client/list.html', { encoding: 'utf8' })
 
 var db = state.db
 var socket = state.socket
@@ -83,6 +84,13 @@ module.exports = function(listId, editKey) {
 			ractive.set('editingName', false)
 
 			emitListChange('overwriteListMetadata', editKey, ractive.get('list.other'))
+		},
+		saveNewCategory: function(name) {
+			var ractive = this
+			ractive.set('addingCategory', false)
+			if (name) {
+				emitListChange('newCategory', editKey, name)
+			}
 		}
 	})
 
@@ -94,8 +102,9 @@ module.exports = function(listId, editKey) {
 		}
 	})
 
-	ractive.on('addNewCategory', function() {
-
+	ractive.on('startAddingCategory', function() {
+		ractive.set('addingCategory', true)
+		ractive.find('input.newCategoryName').select()
 	})
 
 	socket.emit('getList', listId, function(err, list) {

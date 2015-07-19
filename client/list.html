@@ -75,10 +75,34 @@
 					{{/if}}
 				</div>
 			</div>
+
+			<div class="col-xs-4">
+				{{#canEdit}}
+					<div>
+						<button class="btn btn-default" on-click="startAddingCategory">
+							<i class="fa fa-plus border-on-mouseover"></i> add category
+						</button>
+					</div>
+				{{/canEdit}}
+			</div>
+
 		</div>
 
 		{{#categories}}
 			<category></category>
 		{{/categories}}
+
+		<div class="row">
+			{{#if addingCategory}}
+				<div class="col-xs-offset-2 col-xs-8">
+					<input type="text"
+							class="newCategoryName form-control"
+							on-blur="set('addingCategory', false)"
+							on-change="saveNewCategory(newCategoryName)"
+							value="{{newCategoryName}}"
+							placeholder="Cool new category">
+				</div>
+			{{/if}}
+		</div>
 	{{/list}}
 </div>

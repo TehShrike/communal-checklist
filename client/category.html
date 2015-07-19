@@ -1,13 +1,4 @@
 <div class="row">
-	<div class="col-xs-4">
-		{{#canEdit}}
-			<div>
-				<button class="btn btn-default" on-click="addNewCategory">
-					<i class="fa fa-plus border-on-mouseover"></i> add category
-				</button>
-			</div>
-		{{/canEdit}}
-	</div>
 	<div class="col-xs-offset-2 col-xs-8">
 		{{#if editingCategoryName}}
 			<input type="text"
@@ -37,7 +28,7 @@
 		</table>
 	</div>
 
-	{{#canEdit}}
+	{{#if canEdit && !addingCategory}}
 		<div class="col-xs-offset-2 col-xs-8">
 			<label class="control-label">Add a new checklist item</label>
 			<input type="text"
@@ -46,7 +37,7 @@
 					value="{{newItemName}}"
 					on-change="newItem">
 		</div>
-	{{/canEdit}}
+	{{/if}}
 
 
 </div>

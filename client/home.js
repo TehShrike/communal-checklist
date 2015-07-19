@@ -1,6 +1,6 @@
 var Ractive = require('ractive')
 var template = require('fs').readFileSync('client/home.html', { encoding: 'utf8' })
-var socket = require('./socket')
+var socket = require('./client-state').socket
 var router = require('./router')
 
 module.exports = function() {
