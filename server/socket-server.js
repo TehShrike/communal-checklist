@@ -4,8 +4,8 @@ require('array.prototype.find')
 require('array.prototype.findindex')
 var levelup = require('levelup')
 var uuid = require('random-uuid-v4')
-var storage = require('leveldown')
-// var storage = require('memdown')
+// var storage = require('leveldown')
+var storage = require('memdown')
 
 var listMutexes = KeyMaster(createMutex)
 
@@ -14,13 +14,29 @@ var db = levelup('./leveldb-storage', {
 	valueEncoding: 'json'
 })
 
+function removeFromArray(ary, comparator) {
+	var indexToRemove = ary.findIndex(comparator)
+
+	if (indexToRemove >= -1) {
+		ary.splice(indexToRemove, 1)
+	}
+}
+
 function newList() {
 	return {
 		id: uuid(),
 		editKey: uuid(),
-		items: [],
+		categories: [ newCategory('Dummy name') ],
 		other: {},
 		version: 0
+	}
+}
+
+function newCategory(name) {
+	return {
+		id: uuid(),
+		name: name || '',
+		items: []
 	}
 }
 
@@ -29,21 +45,30 @@ function newItem(name) {
 		id: uuid(),
 		name: name || '',
 		url: '',
-		checkboxes: [ newCheckbox() ]
+		checkboxes: []
 	}
 }
 
 function newCheckbox() {
 	return {
-		checkedBy: null,
-		id: uuid()
+		id: uuid(),
+		checkedBy: null
 	}
 }
 
-function getItem(list, itemId) {
-	return list.items.find(function(item) {
-		return item.id === itemId
+function getCategory(list, categoryId) {
+	return list.categories.find(function(category) {
+		return category.id === categoryId
 	})
+}
+
+function getItem(list, categoryId, itemId) {
+	var category = getCategory(list, categoryId)
+	if (category) {
+		return category.items.find(function(item) {
+			return item.id === itemId
+		})
+	}
 }
 
 function getCheckbox(item, checkboxId) {
@@ -52,8 +77,8 @@ function getCheckbox(item, checkboxId) {
 	})
 }
 
-function getCheckboxFromList(list, itemId, checkboxId) {
-	var item = getItem(list, itemId)
+function getCheckboxFromList(list, categoryId, itemId, checkboxId) {
+	var item = getItem(list, categoryId, itemId)
 
 	if (item) {
 		return getCheckbox(item, checkboxId)
@@ -76,28 +101,35 @@ function getAndSave(listId, version, changerFn, cb) {
 	listMutexes.get(listId).writeLock(function(release) {
 		cb = cbFn(cb)
 		db.get(listId, function(err, list) {
+			console.log('got list', err && err.message, list, 'trying to update with version', version)
 			if (err) {
+				console.log(err && err.message)
 				release()
 				cb(err.message)
 			} else if (typeof list.version === 'number' && list.version !== version) {
+				console.log('Someone else beat you to saving the list')
 				release()
 				cb('Someone else beat you to saving the list', list)
 			} else {
 				var newVersion = (list.version || 0) + 1
-				var savedList = changerFn(list)
-				savedList.version = newVersion
-				db.put(listId, savedList, function(err) {
-					release()
-					cb(err && err.message, savedList)
-				})
+				var newListToSave = changerFn(list)
+				if (newListToSave) {
+					newListToSave.version = newVersion
+					db.put(listId, newListToSave, function(err) {
+						release()
+						cb(err && err.message, newListToSave)
+					})
+				} else {
+					cb(null, list)
+				}
 			}
 		})
 	})
 }
 
-function addCheckbox(listId, version, itemId, editKey, cb) {
+function addCheckbox(listId, version, categoryId, itemId, editKey, cb) {
 	getAndSave(listId, version, function(list) {
-		var item = getItem(list, itemId)
+		var item = getItem(list, categoryId, itemId)
 		if (list.editKey === editKey && item) {
 			item.checkboxes.push(newCheckbox())
 		}
@@ -105,9 +137,9 @@ function addCheckbox(listId, version, itemId, editKey, cb) {
 	}, cb)
 }
 
-function removeCheckbox(listId, version, itemId, editKey, cb) {
+function removeCheckbox(listId, version, categoryId, itemId, editKey, cb) {
 	getAndSave(listId, version, function(list) {
-		var item = getItem(list, itemId)
+		var item = getItem(list, categoryId, itemId)
 
 		if (item && item.checkboxes.length > 0 && list.editKey === editKey) {
 			var indexToRemove = item.checkboxes.findIndex(function(checkbox) {
@@ -150,25 +182,68 @@ function uncheck(listId, version, itemId, checkboxId, userName, cb) {
 	}, cb)
 }
 
-
-function addItemAndReturnList(listId, version, editKey, itemName, cb) {
+function addCategoryAndReturnList(listId, version, editKey, categoryName, cb) {
 	getAndSave(listId, version, function(list) {
 		if (list.editKey === editKey) {
-			list.items.push(newItem(itemName))
+			list.categories.push(newCategory(categoryName))
 		}
 		return list
 	}, cb)
 }
 
-function removeItem(listId, version, editKey, itemId, cb) {
+function editCategory(listId, version, categoryId, editKey, categoryName, cb) {
+	console.log('editCategory', arguments)
 	getAndSave(listId, version, function(list) {
 		if (list.editKey === editKey) {
-			var index = list.items.findIndex(function(item) {
-				return item.id === itemId
-			})
 
-			if (index !== -1) {
-				list.items.splice(index, 1)
+			var category = getCategory(list, categoryId)
+
+			if (category) {
+				category.name = categoryName
+			}
+		}
+		console.log('saving and returning', list)
+		return list
+	}, cb)
+}
+
+function addItemAndReturnList(listId, version, categoryId, editKey, itemName, cb) {
+	console.log('YO updating list', listId, 'and category', categoryId, 'version', version)
+	getAndSave(listId, version, function(list) {
+		console.log('eh?')
+		if (list.editKey === editKey) {
+			var category = getCategory(list, categoryId)
+
+			if (category) {
+				category.items.push(newItem(itemName))
+			}
+		}
+		console.log('saving and returning', list)
+		return list
+	}, cb)
+}
+
+function removeCategory(listId, version, editKey, categoryId, cb) {
+	getAndSave(listId, version, function(list) {
+		if (list.editKey === editKey) {
+			removeFromArray(list.categories, function(category) {
+				return category.id === categoryId
+			})
+		}
+
+		return list
+	}, cb)
+}
+
+function removeItem(listId, version, editKey, categoryId, itemId, cb) {
+	getAndSave(listId, version, function(list) {
+		if (list.editKey === editKey) {
+			var category = getCategory(list, categoryId)
+
+			if (category) {
+				removeFromArray(category.items, function(item) {
+					return item.id === itemId
+				})
 			}
 		}
 
@@ -176,10 +251,10 @@ function removeItem(listId, version, editKey, itemId, cb) {
 	}, cb)
 }
 
-function editItem(listId, version, editKey, itemId, item, cb) {
+function editItem(listId, version, editKey, categoryId, itemId, item, cb) {
 	getAndSave(listId, version, function(list) {
 		if (list.editKey === editKey) {
-			var storageItem = getItem(list, itemId)
+			var storageItem = getItem(list, categoryId, itemId)
 
 			if (storageItem) {
 				storageItem.name = item.name
@@ -277,7 +352,13 @@ module.exports = function handleUserConnection(socket) {
 
 	watchAndRebroadcastToList('removeCheckbox', socket, removeCheckbox)
 
+	watchAndRebroadcastToList('newCategory', socket, addCategoryAndReturnList)
+
+	watchAndRebroadcastToList('editCategory', socket, editCategory)
+
 	watchAndRebroadcastToList('newItem', socket, addItemAndReturnList)
+
+	watchAndRebroadcastToList('removeCategory', socket, removeCategory)
 
 	watchAndRebroadcastToList('removeItem', socket, removeItem)
 

@@ -3,24 +3,86 @@ var listTemplate = require('fs').readFileSync('client/list.html', { encoding: 'u
 var socket = require('./socket')
 var router = require('./router')
 var copy = require('shallow-copy')
-var levelup = require('levelup')
-var storage = require('localstorage-down')
+var state = require('./client-state')
 Ractive.decorators.selectOnFocus = require('ractive-select-on-focus')
 
-var db = levelup('communal-checklist', {
-	db: storage
-})
+var db = state.db
+var socket = state.socket
+
+
+function handleList(ractive, list) {
+
+	list.categories.forEach(function(category, index) {
+		category.categoryId = category.id
+
+		category.items.forEach(function(item, index) {
+			item.itemId = item.id
+			item.checkboxes.forEach(function(checkbox) {
+				checkbox.checked = !!checkbox.checkedBy
+			})
+		})
+	})
+
+	console.log('setting list to', list)
+
+	ractive.set('list', list)
+}
 
 module.exports = function(listId, editKey) {
-	var canEdit = !!editKey
+	function handleErrorOrList(err, list) {
+		console.log('got back err/list', err, list)
+		if (err && list) {
+			ractive.set('warning', err)
+		} else if (err) {
+			ractive.set('error', err)
+		}
+
+		// Concurrency errors send back a correct copy of the list
+		if (list) {
+			handleList(ractive, list)
+		}
+	}
+
+	function emitListChange() {
+		ractive.set('error', null)
+		ractive.set('warning', null)
+		var args = Array.prototype.slice.call(arguments)
+		args.splice(1, 0, listId, ractive.get('list.version'))
+		args.push(handleErrorOrList)
+		console.log('emitting', args)
+		socket.emit.apply(socket, args)
+	}
+
 	var ractive = new Ractive({
 		el: 'body',
 		template: listTemplate,
 		data: {
-			canEdit: canEdit,
+			canEdit: !!editKey,
 			currentName: 'Anonymous',
 			newItemName: '',
-			shareUrl: window.location.origin + window.location.pathname + '#/list/' + listId
+			shareUrl: window.location.origin + window.location.pathname + '#/list/' + listId,
+			emitListChange: emitListChange,
+			editKey: editKey
+		},
+		components: {
+			category: require('./category')
+		},
+		beginEditingName: function() {
+			beginEditingName(this)
+		},
+		changeUserName: function() {
+			var ractive = this
+			var name = ractive.get('currentName')
+			db.put('currentName', name)
+			var metadata = ractive.get('list.other')
+			metadata.name = name
+			emitListChange('overwriteListMetadata', editKey, metadata)
+		},
+		saveNameChange: function() {
+			var ractive = this
+			ractive.set('editingName', false)
+
+			emitListChange('overwriteListMetadata', editKey, ractive.get('list.other'))
 		}
 	})
 
@@ -32,99 +94,8 @@ module.exports = function(listId, editKey) {
 		}
 	})
 
-	function handleList(list) {
+	ractive.on('addNewCategory', function() {
 
-		list.items.forEach(function(item, index) {
-			item.itemId = item.id
-			item.checkboxes.forEach(function(checkbox) {
-				checkbox.checked = !!checkbox.checkedBy
-			})
-		})
-
-		ractive.set('list', list)
-	}
-
-	function handleErrorOrList(err, list) {
-		if (err && list) {
-			ractive.set('warning', err)
-		} else if (err) {
-			ractive.set('error', err)
-		}
-
-		// Concurrency errors send back a correct copy of the list
-		if (list) {
-			handleList(list)
-		}
-	}
-
-	function emitListChange() {
-		ractive.set('error', null)
-		ractive.set('warning', null)
-		var args = Array.prototype.slice.call(arguments)
-		args.splice(1, 0, listId, currentVersion())
-		args.push(handleErrorOrList)
-		socket.emit.apply(socket, args)
-	}
-
-	function currentVersion() {
-		return ractive.get('list.version')
-	}
-
-	ractive.on('changeUserName', function() {
-		db.put('currentName', ractive.get('currentName'))
-	})
-
-	ractive.on('checkboxClicked', function(event) {
-		var checkbox = event.context
-		var checked = event.node.checked
-		var itemId = event.node.dataset.itemId
-		var name = ractive.get('currentName')
-
-		emitListChange(checked ? 'check' : 'uncheck', itemId, checkbox.id, name)
-	})
-
-	ractive.on('nameChange', function() {
-		ractive.set('editingName', false)
-
-		emitListChange('overwriteListMetadata', editKey, ractive.get('list.other'))
-	})
-
-	ractive.on('nameKillFocus', function() {
-		ractive.set('editingName', false)
-	})
-
-	ractive.on('newItem', function() {
-		var name = ractive.get('newItemName')
-		if (name) {
-			ractive.set('newItemName', '')
-			emitListChange('newItem', editKey, name)
-		}
-	})
-
-	ractive.on('addCheckbox', function(event) {
-		var itemId = event.node.dataset.itemId
-		emitListChange('addCheckbox', itemId, editKey)
-	})
-	ractive.on('removeCheckbox', function(event) {
-		var itemId = event.node.dataset.itemId
-		emitListChange('removeCheckbox', itemId, editKey)
-	})
-
-	ractive.on('editItem', function(event) {
-		ractive.set(event.keypath + '.editingItem', true)
-	})
-
-	ractive.on('saveItem', function(event) {
-		var item = event.context
-		emitListChange('editItem', editKey, item.id, item)
-		ractive.set(event.keypath + '.editingItem', false)
-	})
-
-	ractive.on('editName', editName.bind(null, ractive))
-
-	ractive.on('removeItem', function(event) {
-		var itemId = event.node.dataset.itemId
-		emitListChange('removeItem', editKey, itemId)
 	})
 
 	socket.emit('getList', listId, function(err, list) {
@@ -136,23 +107,22 @@ module.exports = function(listId, editKey) {
 
 	socket.on('change', function(list) {
 		if (list.id === listId) {
-			handleList(list)
+			handleList(ractive, list)
 		}
 	})
 }
 
 function onLoad(ractive) {
 	if (!ractive.get('list.other.name')) {
-		editName(ractive)
+		beginEditingName(ractive)
 	} else if (ractive.get('currentName') === 'Anonymous') {
 		ractive.find('.current-name').select()
 	}
 }
 
-function editName(ractive) {
+function beginEditingName(ractive) {
 	if (ractive.get('canEdit')) {
 		ractive.set('editingName', true)
 		ractive.find('input.listName').select()
 	}
 }
-

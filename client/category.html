@@ -1,0 +1,52 @@
+<div class="row">
+	<div class="col-xs-4">
+		{{#canEdit}}
+			<div>
+				<button class="btn btn-default" on-click="addNewCategory">
+					<i class="fa fa-plus border-on-mouseover"></i> add category
+				</button>
+			</div>
+		{{/canEdit}}
+	</div>
+	<div class="col-xs-offset-2 col-xs-8">
+		{{#if editingCategoryName}}
+			<input type="text"
+					class="form-control categoryName"
+					on-blur="categoryNameChange"
+					on-change="categoryNameChange"
+					data-item-id="{{itemId}}"
+					data-category-id="{{categoryId}}"
+					value="{{name}}"
+					placeholder="Category of things that are super-awesome">
+		{{else}} <!-- if list.categories.length > 1 -->
+			<h2 on-click="startEditingCategoryName">
+				{{name}}
+
+				<button class="btn btn-link">
+					<i class="fa fa-pencil"></i>
+				</button>
+			</h2>
+		{{/if}}
+
+		<table class="table table-striped">
+			<tbody>
+				{{#items}}
+					<item></item>
+				{{/items}}
+			</tbody>
+		</table>
+	</div>
+
+	{{#canEdit}}
+		<div class="col-xs-offset-2 col-xs-8">
+			<label class="control-label">Add a new checklist item</label>
+			<input type="text"
+					class="form-control"
+					placeholder="Pantaloons"
+					value="{{newItemName}}"
+					on-change="newItem">
+		</div>
+	{{/canEdit}}
+
+
+</div>

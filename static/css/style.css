@@ -60,3 +60,18 @@ td.col-checkboxes input[type="checkbox"][disabled] {
 	width: 352px;
 }
 
+.border-on-mouseover {
+	border: 1px;
+	width: 16px;
+	height: 16px;
+	padding: 0 0 0 2px;
+}
+
+.color-gray {
+	color: gray;
+}
+
+.border-on-mouseover:hover {
+	border: 1px solid silver;
+	padding: 0 0 0 1px;
+}

@@ -1,0 +1,63 @@
+<tr>
+	<td class="col-edit">
+		{{#editingItem}}
+
+			<button
+					class="btn btn-primary btn-xs margin-top-minus-5"
+					on-click="saveItem">
+				Save
+			</button>
+		{{else}}
+			<a
+					on-click="editItem"
+					class="{{^canEdit}}hide{{/canEdit}} cursor-pointer">
+				Edit
+			</a>
+		{{/editingItem}}
+	</td>
+	<td>
+		{{#editingItem}}
+			<div class="margin-bottom-minus-5 margin-top-minus-5">
+				<input type="text" on-change="saveItem" value="{{name}}" placeholder="Do cool thing">
+				<input type="text" on-change="saveItem" value="{{url}}" placeholder="http://amazon.com/butts">
+			</div>
+		{{else}}
+			{{#url}}
+				<a href="{{url}}" target="_blank">{{name}}</a>
+			{{else}}
+				{{name}}
+			{{/url}}
+		{{/editingItem}}
+	</td>
+	<td class="col-checkboxes">
+		{{#checkboxes}}
+			<input type="checkbox"
+					data-item-id="{{itemId}}"
+					on-change="checkboxClicked"
+					disabled="{{checkedBy && checkedBy !== currentName}}"
+					title="{{canEdit ? checkedBy : ''}}"
+					checked="{{checked}}">
+		{{/checkboxes}}
+	</td>
+	<td class="col-icons">
+		{{#canEdit}}
+			<i class="fa fa-minus-square-o"
+					data-category-id="{{categoryId}}"
+					data-item-id="{{itemId}}"
+					on-click="removeCheckbox">
+			</i>
+			<i class="fa fa-plus-square-o"
+					data-category-id="{{categoryId}}"
+					data-item-id="{{itemId}}"
+					on-click="addCheckbox">
+			</i>
+			{{#editingItem}}
+				<i class="fa fa-trash-o"
+						data-category-id="{{categoryId}}"
+						data-item-id="{{itemId}}"
+						on-click="removeItem">
+				</i>
+			{{/editingItem}}
+		{{/canEdit}}
+	</td>
+</tr>
