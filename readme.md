@@ -10,7 +10,7 @@ cd communal-checklist
 npm install
 npm run build
 npm run start
-``
+```
 
 ## To do
 
