@@ -18,8 +18,6 @@ function handleCategoryComponent(component) {
 		var args = Array.prototype.slice.call(arguments)
 		args.splice(1, 0, component.get('editKey'), component.get('categoryId'))
 
-		console.log('emitting', args, component.get('editKey'), component.get('categoryId'))
-
 		component.get('emitListChange').apply(null, args)
 	}
 
