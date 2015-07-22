@@ -16,7 +16,9 @@ function handleCategoryComponent(component) {
 
 	function emitListChange() {
 		var args = Array.prototype.slice.call(arguments)
-		args.splice(1, 0, component.get('categoryId'))
+		args.splice(1, 0, component.get('editKey'), component.get('categoryId'))
+
+		console.log('emitting', args, component.get('editKey'), component.get('categoryId'))
 
 		component.get('emitListChange').apply(null, args)
 	}
@@ -28,26 +30,41 @@ function handleCategoryComponent(component) {
 		}
 	})
 
-	component.on('categoryNameChange', function(event) {
+	component.on('startEditingCategoryDescription', function(event) {
 		if (component.get('canEdit')) {
-			var name = component.get('name')
-			var editKey = component.get('editKey')
-
-			component.set('editingCategoryName', false)
-			emitListChange('editCategory', editKey, name)
+			component.set('editingCategoryDescription', true)
+			component.find('textarea.categoryDescription').select()
 		}
 	})
+
+	component.on('categoryNameChange', function(event) {
+		saveCategory()
+		component.set('editingCategoryName', false)
+	})
+
+	component.on('categoryDescriptionChange', function() {
+		saveCategory()
+		component.set('editingCategoryDescription', false)
+	})
+
+	function saveCategory() {
+		if (component.get('canEdit')) {
+			var name = component.get('name')
+			var description = component.get('description')
+			emitListChange('editCategory', name, description)
+		}
+	}
 
 	component.on('newItem', function() {
 		var name = component.get('newItemName')
 		if (name) {
 			component.set('newItemName', '')
-			emitListChange('newItem', component.get('editKey'), name)
+			emitListChange('newItem', name)
 		}
 	})
 
 	component.on('removeItem', function(event) {
 		var itemId = event.node.dataset.itemId
-		emitListChange('removeItem', component.get('editKey'), itemId)
+		emitListChange('removeItem', itemId)
 	})
 }

@@ -1,28 +1,55 @@
 <div class="row">
-	<div class="col-xs-offset-2 col-xs-8">
+	<div class="col-xs-offset-2 col-xs-8 margin-top-30">
 		{{#if editingCategoryName}}
 			<input type="text"
 					class="form-control categoryName"
 					on-blur="categoryNameChange"
 					on-change="categoryNameChange"
-					data-item-id="{{itemId}}"
-					data-category-id="{{categoryId}}"
 					value="{{name}}"
 					placeholder="Category of things that are super-awesome">
-		{{else}} <!-- if list.categories.length > 1 -->
-			<h2 on-click="startEditingCategoryName">
+		{{elseif canEdit}}
+			<h2 on-click="startEditingCategoryName" class="margin-top-0">
 				{{name}}
 
 				<button class="btn btn-link">
 					<i class="fa fa-pencil"></i>
 				</button>
 			</h2>
+		{{elseif list.categories.length > 1 || name != 'Dummy name'}}
+			<h2>
+				{{name}}
+			</h2>
 		{{/if}}
+	</div>
+	<div class="col-xs-offset-2 col-xs-8">
+		{{#if editingCategoryDescription}}
+			<textarea
+					class="form-control categoryDescription"
+					on-blur="categoryDescriptionChange"
+					on-change="categoryDescriptionChange"
+					value="{{description}}"
+					placeholder="Check out these awesome things!">
+			</textarea>
+		{{elseif canEdit}}
+			<p on-click="startEditingCategoryDescription">
+				{{description || 'Category description...'}}
+				<button class="btn btn-link">
+					<i class="fa fa-pencil"></i>
+				</button>
+			</p>
+		{{else}}
+			<p>
+				{{description}}
+			</p>
+		{{/if}}
+	</div>
+
+	<div class="col-xs-offset-2 col-xs-8">
 
 		<table class="table table-striped">
 			<tbody>
 				{{#items}}
-					<item></item>
+					<item itemId="{{itemId}}" categoryId="{{categoryId}}"></item>
 				{{/items}}
 			</tbody>
 		</table>

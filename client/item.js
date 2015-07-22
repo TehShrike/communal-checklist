@@ -11,14 +11,20 @@ module.exports = Ractive.extend({
 
 function handleItemComponent(component) {
 	var emitListChange = component.get('emitListChange')
+	function categoryId() {
+		return component.get('categoryId')
+	}
+	function editKey() {
+		return component.get('editKey')
+	}
 
 	component.on('addCheckbox', function(event) {
 		var itemId = event.node.dataset.itemId
-		emitListChange('addCheckbox', itemId, editKey)
+		emitListChange('addCheckbox', editKey(), categoryId(), itemId)
 	})
 	component.on('removeCheckbox', function(event) {
 		var itemId = event.node.dataset.itemId
-		emitListChange('removeCheckbox', itemId, editKey)
+		emitListChange('removeCheckbox', editKey(), categoryId(), itemId)
 	})
 
 	component.on('editItem', function(event) {
@@ -37,6 +43,6 @@ function handleItemComponent(component) {
 		var itemId = event.node.dataset.itemId
 		var name = component.get('currentName')
 
-		emitListChange(checked ? 'check' : 'uncheck', itemId, checkbox.id, name)
+		emitListChange(checked ? 'check' : 'uncheck', categoryId(), itemId, checkbox.id, name)
 	})
 }

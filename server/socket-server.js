@@ -4,8 +4,8 @@ require('array.prototype.find')
 require('array.prototype.findindex')
 var levelup = require('levelup')
 var uuid = require('random-uuid-v4')
-// var storage = require('leveldown')
-var storage = require('memdown')
+var storage = require('leveldown')
+// var storage = require('memdown')
 
 var listMutexes = KeyMaster(createMutex)
 
@@ -36,6 +36,7 @@ function newCategory(name) {
 	return {
 		id: uuid(),
 		name: name || '',
+		description: '',
 		items: []
 	}
 }
@@ -45,7 +46,7 @@ function newItem(name) {
 		id: uuid(),
 		name: name || '',
 		url: '',
-		checkboxes: []
+		checkboxes: [ newCheckbox() ]
 	}
 }
 
@@ -124,9 +125,10 @@ function getAndSave(listId, version, changerFn, cb) {
 	})
 }
 
-function addCheckbox(listId, version, categoryId, itemId, editKey, cb) {
+function addCheckbox(listId, version, editKey, categoryId, itemId, cb) {
 	getAndSave(listId, version, function(list) {
 		var item = getItem(list, categoryId, itemId)
+
 		if (list.editKey === editKey && item) {
 			item.checkboxes.push(newCheckbox())
 		}
@@ -134,7 +136,7 @@ function addCheckbox(listId, version, categoryId, itemId, editKey, cb) {
 	}, cb)
 }
 
-function removeCheckbox(listId, version, categoryId, itemId, editKey, cb) {
+function removeCheckbox(listId, version, editKey, categoryId, itemId, cb) {
 	getAndSave(listId, version, function(list) {
 		var item = getItem(list, categoryId, itemId)
 
@@ -157,9 +159,9 @@ function normalizeUserName(userName) {
 	return userName || 'Anonymous'
 }
 
-function check(listId, version, itemId, checkboxId, userName, cb) {
+function check(listId, version, categoryId, itemId, checkboxId, userName, cb) {
 	getAndSave(listId, version, function(list) {
-		var checkbox = getCheckboxFromList(list, itemId, checkboxId)
+		var checkbox = getCheckboxFromList(list, categoryId, itemId, checkboxId)
 		if (!checkbox.checkedBy) {
 			checkbox.checkedBy = normalizeUserName(userName)
 		}
@@ -168,9 +170,9 @@ function check(listId, version, itemId, checkboxId, userName, cb) {
 	}, cb)
 }
 
-function uncheck(listId, version, itemId, checkboxId, userName, cb) {
+function uncheck(listId, version, categoryId, itemId, checkboxId, userName, cb) {
 	getAndSave(listId, version, function(list) {
-		var checkbox = getCheckboxFromList(list, itemId, checkboxId)
+		var checkbox = getCheckboxFromList(list, categoryId, itemId, checkboxId)
 		if (checkbox.checkedBy === normalizeUserName(userName)) {
 			checkbox.checkedBy = null
 		}
@@ -188,7 +190,7 @@ function addCategoryAndReturnList(listId, version, editKey, categoryName, cb) {
 	}, cb)
 }
 
-function editCategory(listId, version, categoryId, editKey, categoryName, cb) {
+function editCategory(listId, version, editKey, categoryId, categoryName, description, cb) {
 	getAndSave(listId, version, function(list) {
 		if (list.editKey === editKey) {
 
@@ -196,13 +198,14 @@ function editCategory(listId, version, categoryId, editKey, categoryName, cb) {
 
 			if (category) {
 				category.name = categoryName
+				category.description = description
 			}
 		}
 		return list
 	}, cb)
 }
 
-function addItemAndReturnList(listId, version, categoryId, editKey, itemName, cb) {
+function addItemAndReturnList(listId, version, editKey, categoryId, itemName, cb) {
 	getAndSave(listId, version, function(list) {
 		if (list.editKey === editKey) {
 			var category = getCategory(list, categoryId)
