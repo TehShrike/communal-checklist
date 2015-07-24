@@ -14,6 +14,7 @@ npm run start
 
 ## To do
 
+- change "Dummy name" to something else, and make sure it's hidden on single-category lists
 - adding a new category should scroll you down so you can see it
 - add a note about why you should only share the "share" link
 - update the animated gifs
