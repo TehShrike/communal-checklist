@@ -22,11 +22,11 @@
 				<input type="text" on-change="saveItem:{{name}},{{url}}" value="{{url}}" placeholder="http://amazon.com/butts">
 			</div>
 		{{else}}
-			{{#item.url}}
-				<a href="{{item.url}}" target="_blank">{{item.name}}</a>
+			{{#url}}
+				<a href="{{url}}" target="_blank">{{name}}</a>
 			{{else}}
-				{{item.name}}
-			{{/item.url}}
+				{{name}}
+			{{/url}}
 		{{/if}}
 	</td>
 	<td class="col-checkboxes">
