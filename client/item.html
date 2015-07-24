@@ -1,6 +1,6 @@
 <tr>
 	<td class="col-edit">
-		{{#editingItem}}
+		{{#if editingItem}}
 
 			<button
 					class="btn btn-primary btn-xs margin-top-minus-5"
@@ -13,26 +13,25 @@
 					class="{{^canEdit}}hide{{/canEdit}} cursor-pointer">
 				Edit
 			</a>
-		{{/editingItem}}
+		{{/if}}
 	</td>
 	<td>
-		{{#editingItem}}
+		{{#if editingItem}}
 			<div class="margin-bottom-minus-5 margin-top-minus-5">
-				<input type="text" on-change="saveItem" value="{{name}}" placeholder="Do cool thing">
-				<input type="text" on-change="saveItem" value="{{url}}" placeholder="http://amazon.com/butts">
+				<input type="text" on-change="saveItem:{{name}},{{url}}" value="{{name}}" placeholder="Do cool thing">
+				<input type="text" on-change="saveItem:{{name}},{{url}}" value="{{url}}" placeholder="http://amazon.com/butts">
 			</div>
 		{{else}}
-			{{#url}}
-				<a href="{{url}}" target="_blank">{{name}}</a>
+			{{#item.url}}
+				<a href="{{item.url}}" target="_blank">{{item.name}}</a>
 			{{else}}
-				{{name}}
-			{{/url}}
-		{{/editingItem}}
+				{{item.name}}
+			{{/item.url}}
+		{{/if}}
 	</td>
 	<td class="col-checkboxes">
 		{{#checkboxes}}
 			<input type="checkbox"
-					data-item-id="{{itemId}}"
 					on-change="checkboxClicked"
 					disabled="{{checkedBy && checkedBy !== currentName}}"
 					title="{{canEdit ? checkedBy : ''}}"
@@ -41,21 +40,12 @@
 	</td>
 	<td class="col-icons">
 		{{#canEdit}}
-			<i class="fa fa-minus-square-o"
-					data-category-id="{{categoryId}}"
-					data-item-id="{{itemId}}"
-					on-click="removeCheckbox">
+			<i class="fa fa-minus-square-o" on-click="removeCheckbox">
 			</i>
-			<i class="fa fa-plus-square-o"
-					data-category-id="{{categoryId}}"
-					data-item-id="{{itemId}}"
-					on-click="addCheckbox">
+			<i class="fa fa-plus-square-o" on-click="addCheckbox">
 			</i>
 			{{#editingItem}}
-				<i class="fa fa-trash-o"
-						data-category-id="{{categoryId}}"
-						data-item-id="{{itemId}}"
-						on-click="removeItem">
+				<i class="fa fa-trash-o" on-click="removeItem">
 				</i>
 			{{/editingItem}}
 		{{/canEdit}}

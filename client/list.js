@@ -1,5 +1,6 @@
 var Ractive = require('ractive')
 var copy = require('shallow-copy')
+var extend = require('xtend')
 
 var router = require('./router')
 var state = require('./client-state')
@@ -12,7 +13,6 @@ var socket = state.socket
 
 
 function handleList(ractive, list) {
-
 	list.categories.forEach(function(category, index) {
 		category.categoryId = category.id
 
@@ -41,14 +41,21 @@ module.exports = function(listId, editKey) {
 		}
 	}
 
-	function emitListChange() {
+	function emitListChange(key, object) {
 		ractive.set('error', null)
 		ractive.set('warning', null)
-		var args = Array.prototype.slice.call(arguments)
-		args.splice(1, 0, listId, ractive.get('list.version'))
-		args.push(handleErrorOrList)
 
-		socket.emit.apply(socket, args)
+		// console.log(key, extend({
+		// 	listId: listId,
+		// 	editKey: editKey,
+		// 	version: ractive.get('list.version')
+		// }, object))
+
+		socket.emit(key, extend({
+			listId: listId,
+			editKey: editKey,
+			version: ractive.get('list.version')
+		}, object), handleErrorOrList)
 	}
 
 	var ractive = new Ractive({
@@ -71,22 +78,24 @@ module.exports = function(listId, editKey) {
 		changeUserName: function() {
 			var ractive = this
 			var name = ractive.get('currentName')
-			db.put('currentName', name)
 			var metadata = ractive.get('list.other')
 			metadata.name = name
-			emitListChange('overwriteListMetadata', editKey, metadata)
+
+			db.put('currentName', name)
+
+			emitListChange('overwriteListMetadata', { other: metadata })
 		},
-		saveNameChange: function() {
+		saveListNameChange: function() {
 			var ractive = this
 			ractive.set('editingName', false)
 
-			emitListChange('overwriteListMetadata', editKey, ractive.get('list.other'))
+			emitListChange('overwriteListMetadata', { other: ractive.get('list.other') })
 		},
 		saveNewCategory: function(name) {
 			var ractive = this
 			ractive.set('addingCategory', false)
 			if (name) {
-				emitListChange('newCategory', editKey, name)
+				emitListChange('newCategory', { name: name })
 			}
 		}
 	})

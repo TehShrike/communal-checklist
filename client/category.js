@@ -1,6 +1,22 @@
 var Ractive = require('ractive')
+var extend = require('xtend')
 var state = require('./client-state')
 var template = require('fs').readFileSync('client/category.html', { encoding: 'utf8' })
+
+var paragraphs = Ractive.extend({
+	isolated: true,
+	oninit: function() {
+		var component = this
+		var text = component.get('text')
+		component.set('paragraphs', text.split(/\n+/).filter(function(str) {
+			return !str.match(/^\s*$/)
+		}))
+	},
+	last: function(n) {
+		return n == component.get('paragraphs').length - 1
+	},
+	template: '{{#paragraphs:i}}<p>{{.}} {{#if i == paragraphs.length - 1 }}{{>content}}{{/if}}</p>{{/paragraphs}}'
+})
 
 module.exports = Ractive.extend({
 	template: template,
@@ -8,18 +24,23 @@ module.exports = Ractive.extend({
 		handleCategoryComponent(this)
 	},
 	components: {
-		item: require('./item')
+		item: require('./item'),
+		paragraphs: paragraphs
+	},
+	data: {
+		newItemName: ''
 	}
 })
 
 function handleCategoryComponent(component) {
 
-	function emitListChange() {
-		var args = Array.prototype.slice.call(arguments)
-		args.splice(1, 0, component.get('editKey'), component.get('categoryId'))
-
-		component.get('emitListChange').apply(null, args)
+	function emitCategoryChange(key, object) {
+		component.get('emitListChange')(key, extend({
+			categoryId: component.get('categoryId')
+		}, object))
 	}
+
+	component.set('emitCategoryChange', emitCategoryChange)
 
 	component.on('startEditingCategoryName', function(event) {
 		if (component.get('canEdit')) {
@@ -47,9 +68,10 @@ function handleCategoryComponent(component) {
 
 	function saveCategory() {
 		if (component.get('canEdit')) {
-			var name = component.get('name')
-			var description = component.get('description')
-			emitListChange('editCategory', name, description)
+			emitCategoryChange('editCategory', {
+				name: component.get('name'),
+				description: component.get('description')
+			})
 		}
 	}
 
@@ -57,12 +79,12 @@ function handleCategoryComponent(component) {
 		var name = component.get('newItemName')
 		if (name) {
 			component.set('newItemName', '')
-			emitListChange('newItem', name)
+			emitCategoryChange('newItem', { name: name })
 		}
 	})
 
 	component.on('removeItem', function(event) {
 		var itemId = event.node.dataset.itemId
-		emitListChange('removeItem', itemId)
+		emitCategoryChange('removeItem', { itemId: itemId })
 	})
 }

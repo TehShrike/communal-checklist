@@ -31,12 +31,13 @@
 					placeholder="Check out these awesome things!">
 			</textarea>
 		{{elseif canEdit}}
-			<p on-click="startEditingCategoryDescription">
-				{{description || 'Category description...'}}
-				<button class="btn btn-link">
-					<i class="fa fa-pencil"></i>
-				</button>
-			</p>
+			<div on-click="startEditingCategoryDescription">
+				<paragraphs text="{{description || 'Category description...'}}">
+					<button class="btn btn-link" on-click="startEditingCategoryDescription">
+						<i class="fa fa-pencil"></i>
+					</button>
+				</paragraphs>
+			</div>
 		{{else}}
 			<p>
 				{{description}}
@@ -49,7 +50,7 @@
 		<table class="table table-striped">
 			<tbody>
 				{{#items}}
-					<item itemId="{{itemId}}" categoryId="{{categoryId}}"></item>
+					<item></item>
 				{{/items}}
 			</tbody>
 		</table>

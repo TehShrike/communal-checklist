@@ -22,17 +22,17 @@ function removeFromArray(ary, comparator) {
 	}
 }
 
-function newList() {
+function createNewList() {
 	return {
 		id: uuid(),
 		editKey: uuid(),
-		categories: [ newCategory('Dummy name') ],
+		categories: [ createNewCategory('Dummy name') ],
 		other: {},
 		version: 0
 	}
 }
 
-function newCategory(name) {
+function createNewCategory(name) {
 	return {
 		id: uuid(),
 		name: name || '',
@@ -41,16 +41,16 @@ function newCategory(name) {
 	}
 }
 
-function newItem(name) {
+function createNewItem(name) {
 	return {
 		id: uuid(),
 		name: name || '',
 		url: '',
-		checkboxes: [ newCheckbox() ]
+		checkboxes: [ createNewCheckbox() ]
 	}
 }
 
-function newCheckbox() {
+function createNewCheckbox() {
 	return {
 		id: uuid(),
 		checkedBy: null
@@ -113,6 +113,7 @@ function getAndSave(listId, version, changerFn, cb) {
 				var newListToSave = changerFn(list)
 				if (newListToSave) {
 					newListToSave.version = newVersion
+
 					db.put(listId, newListToSave, function(err) {
 						release()
 						cb(err && err.message, newListToSave)
@@ -125,22 +126,22 @@ function getAndSave(listId, version, changerFn, cb) {
 	})
 }
 
-function addCheckbox(listId, version, editKey, categoryId, itemId, cb) {
-	getAndSave(listId, version, function(list) {
-		var item = getItem(list, categoryId, itemId)
+function addCheckbox(checkbox, cb) {
+	getAndSave(checkbox.listId, checkbox.version, function(list) {
+		var item = getItem(list, checkbox.categoryId, checkbox.itemId)
 
-		if (list.editKey === editKey && item) {
-			item.checkboxes.push(newCheckbox())
+		if (list.editKey === checkbox.editKey && item) {
+			item.checkboxes.push(createNewCheckbox())
 		}
 		return list
 	}, cb)
 }
 
-function removeCheckbox(listId, version, editKey, categoryId, itemId, cb) {
-	getAndSave(listId, version, function(list) {
-		var item = getItem(list, categoryId, itemId)
+function removeCheckbox(checkbox, cb) {
+	getAndSave(checkbox.listId, checkbox.version, function(list) {
+		var item = getItem(list, checkbox.categoryId, checkbox.itemId)
 
-		if (item && item.checkboxes.length > 0 && list.editKey === editKey) {
+		if (item && item.checkboxes.length > 0 && list.editKey === checkbox.editKey) {
 			var indexToRemove = item.checkboxes.findIndex(function(checkbox) {
 				return !checkbox.checkedBy
 			})
@@ -159,59 +160,59 @@ function normalizeUserName(userName) {
 	return userName || 'Anonymous'
 }
 
-function check(listId, version, categoryId, itemId, checkboxId, userName, cb) {
-	getAndSave(listId, version, function(list) {
-		var checkbox = getCheckboxFromList(list, categoryId, itemId, checkboxId)
-		if (!checkbox.checkedBy) {
-			checkbox.checkedBy = normalizeUserName(userName)
+function check(checkbox, cb) {
+	getAndSave(checkbox.listId, checkbox.version, function(list) {
+		var existingCheckbox = getCheckboxFromList(list, checkbox.categoryId, checkbox.itemId, checkbox.checkboxId)
+		if (!existingCheckbox.checkedBy) {
+			existingCheckbox.checkedBy = normalizeUserName(checkbox.name)
 		}
 
 		return list
 	}, cb)
 }
 
-function uncheck(listId, version, categoryId, itemId, checkboxId, userName, cb) {
-	getAndSave(listId, version, function(list) {
-		var checkbox = getCheckboxFromList(list, categoryId, itemId, checkboxId)
-		if (checkbox.checkedBy === normalizeUserName(userName)) {
-			checkbox.checkedBy = null
+function uncheck(checkbox, cb) {
+	getAndSave(checkbox.listId, checkbox.version, function(list) {
+		var existingCheckbox = getCheckboxFromList(list, checkbox.categoryId, checkbox.itemId, checkbox.checkboxId)
+		if (existingCheckbox.checkedBy === normalizeUserName(checkbox.name)) {
+			existingCheckbox.checkedBy = null
 		}
 
 		return list
 	}, cb)
 }
 
-function addCategoryAndReturnList(listId, version, editKey, categoryName, cb) {
-	getAndSave(listId, version, function(list) {
-		if (list.editKey === editKey) {
-			list.categories.push(newCategory(categoryName))
+function addCategoryAndReturnList(newCategory, cb) {
+	getAndSave(newCategory.listId, newCategory.version, function(list) {
+		if (list.editKey === newCategory.editKey) {
+			list.categories.push(createNewCategory(newCategory.name))
 		}
 		return list
 	}, cb)
 }
 
-function editCategory(listId, version, editKey, categoryId, categoryName, description, cb) {
-	getAndSave(listId, version, function(list) {
-		if (list.editKey === editKey) {
+function editCategory(category, cb) {
+	getAndSave(category.listId, category.version, function(list) {
+		if (list.editKey === category.editKey) {
 
-			var category = getCategory(list, categoryId)
+			var existingCategory = getCategory(list, category.categoryId)
 
-			if (category) {
-				category.name = categoryName
-				category.description = description
+			if (existingCategory) {
+				existingCategory.name = category.name
+				existingCategory.description = category.description
 			}
 		}
 		return list
 	}, cb)
 }
 
-function addItemAndReturnList(listId, version, editKey, categoryId, itemName, cb) {
-	getAndSave(listId, version, function(list) {
-		if (list.editKey === editKey) {
-			var category = getCategory(list, categoryId)
+function addItemAndReturnList(item, cb) {
+	getAndSave(item.listId, item.version, function(list) {
+		if (list.editKey === item.editKey) {
+			var category = getCategory(list, item.categoryId)
 
 			if (category) {
-				category.items.push(newItem(itemName))
+				category.items.push(createNewItem(item.name))
 			}
 		}
 
@@ -219,11 +220,11 @@ function addItemAndReturnList(listId, version, editKey, categoryId, itemName, cb
 	}, cb)
 }
 
-function removeCategory(listId, version, editKey, categoryId, cb) {
-	getAndSave(listId, version, function(list) {
-		if (list.editKey === editKey) {
-			removeFromArray(list.categories, function(category) {
-				return category.id === categoryId
+function removeCategory(category, cb) {
+	getAndSave(category.listId, category.version, function(list) {
+		if (list.editKey === category.editKey) {
+			removeFromArray(list.categories, function(existingCategory) {
+				return existingCategory.id === category.categoryId
 			})
 		}
 
@@ -231,14 +232,14 @@ function removeCategory(listId, version, editKey, categoryId, cb) {
 	}, cb)
 }
 
-function removeItem(listId, version, editKey, categoryId, itemId, cb) {
-	getAndSave(listId, version, function(list) {
-		if (list.editKey === editKey) {
-			var category = getCategory(list, categoryId)
+function removeItem(item, cb) {
+	getAndSave(item.listId, item.version, function(list) {
+		if (list.editKey === item.editKey) {
+			var category = getCategory(list, item.categoryId)
 
 			if (category) {
-				removeFromArray(category.items, function(item) {
-					return item.id === itemId
+				removeFromArray(category.items, function(existingItem) {
+					return existingItem.id === item.itemId
 				})
 			}
 		}
@@ -247,15 +248,15 @@ function removeItem(listId, version, editKey, categoryId, itemId, cb) {
 	}, cb)
 }
 
-function editItem(listId, version, editKey, categoryId, itemId, item, cb) {
-	getAndSave(listId, version, function(list) {
-		if (list.editKey === editKey) {
-			var storageItem = getItem(list, categoryId, itemId)
+function editItem(itemHolder, cb) {
+	getAndSave(itemHolder.listId, itemHolder.version, function(list) {
+		if (list.editKey === itemHolder.editKey) {
+			var item = itemHolder.item
+			var storageItem = getItem(list, itemHolder.categoryId, itemHolder.itemId)
 
 			if (storageItem) {
 				storageItem.name = item.name
 				storageItem.url = item.url
-				storageItem.checkboxes = item.checkboxes
 			}
 		}
 
@@ -264,18 +265,18 @@ function editItem(listId, version, editKey, categoryId, itemId, item, cb) {
 }
 
 function saveNewList(cb) {
-	var list = newList()
+	var list = createNewList()
 	db.put(list.id, list, function(err) {
 		cbFn(cb)(err && err.message, list)
 	})
 }
 
-function overwriteListMetadata(listId, version, editKey, other, cb) {
-	getAndSave(listId, version, function(list) {
-		if (editKey === list.editKey) {
-			list.other = other
+function overwriteListMetadata(list, cb) {
+	getAndSave(list.listId, list.version, function(existingList) {
+		if (list.editKey === existingList.editKey) {
+			existingList.other = list.other
 		}
-		return list
+		return existingList
 	}, cb)
 }
 
@@ -318,22 +319,21 @@ function addAnotherCallback(args, withThisCallback) {
 }
 
 function returnSocketEventHandler(socket, fn) {
-	return function socketEventHandler() {
-		var args = Array.prototype.slice.call(arguments)
-		var listId = args[0]
+	return function socketEventHandler(object, cb) {
+		var newCb = cb
+		var listId = object.listId
 
 		if (listId) {
-			fn.apply(null, addAnotherCallback(args, function(err, value) {
+			newCb = function(err, value) {
 				if (!err) {
 					socket.broadcast.to(listId).emit('change', value)
 				}
-			}))
+				cb(err, value)
+			}
 		}
-	}
-}
 
-function watchAndRebroadcastToList(message, socket, fn) {
-	socket.on(message, returnSocketEventHandler(socket, fn))
+		fn(object, newCb)
+	}
 }
 
 module.exports = function handleUserConnection(socket) {
@@ -344,25 +344,29 @@ module.exports = function handleUserConnection(socket) {
 		getList(listId, cb)
 	})
 
-	watchAndRebroadcastToList('addCheckbox', socket, addCheckbox)
+	function watchAndRebroadcastToList(message, fn) {
+		socket.on(message, returnSocketEventHandler(socket, fn))
+	}
 
-	watchAndRebroadcastToList('removeCheckbox', socket, removeCheckbox)
+	watchAndRebroadcastToList('addCheckbox', addCheckbox)
 
-	watchAndRebroadcastToList('newCategory', socket, addCategoryAndReturnList)
+	watchAndRebroadcastToList('removeCheckbox', removeCheckbox)
 
-	watchAndRebroadcastToList('editCategory', socket, editCategory)
+	watchAndRebroadcastToList('newCategory', addCategoryAndReturnList)
 
-	watchAndRebroadcastToList('newItem', socket, addItemAndReturnList)
+	watchAndRebroadcastToList('editCategory', editCategory)
 
-	watchAndRebroadcastToList('removeCategory', socket, removeCategory)
+	watchAndRebroadcastToList('newItem', addItemAndReturnList)
 
-	watchAndRebroadcastToList('removeItem', socket, removeItem)
+	watchAndRebroadcastToList('removeCategory', removeCategory)
 
-	watchAndRebroadcastToList('editItem', socket, editItem)
+	watchAndRebroadcastToList('removeItem', removeItem)
 
-	watchAndRebroadcastToList('check', socket, check)
+	watchAndRebroadcastToList('editItem', editItem)
 
-	watchAndRebroadcastToList('uncheck', socket, uncheck)
+	watchAndRebroadcastToList('check', check)
 
-	watchAndRebroadcastToList('overwriteListMetadata', socket, overwriteListMetadata)
+	watchAndRebroadcastToList('uncheck', uncheck)
+
+	watchAndRebroadcastToList('overwriteListMetadata', overwriteListMetadata)
 }

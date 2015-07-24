@@ -1,4 +1,5 @@
 var Ractive = require('ractive')
+var extend = require('xtend')
 var state = require('./client-state')
 var template = require('fs').readFileSync('client/item.html', { encoding: 'utf8' })
 
@@ -10,39 +11,42 @@ module.exports = Ractive.extend({
 })
 
 function handleItemComponent(component) {
-	var emitListChange = component.get('emitListChange')
-	function categoryId() {
-		return component.get('categoryId')
-	}
-	function editKey() {
-		return component.get('editKey')
+
+	function emitItemChange(key, object) {
+		var emitCategoryChange = component.get('emitCategoryChange')
+
+		emitCategoryChange(key, extend({
+			itemId: component.get('itemId')
+		}, object))
 	}
 
-	component.on('addCheckbox', function(event) {
-		var itemId = event.node.dataset.itemId
-		emitListChange('addCheckbox', editKey(), categoryId(), itemId)
+	component.on('addCheckbox', function() {
+		emitItemChange('addCheckbox')
 	})
-	component.on('removeCheckbox', function(event) {
-		var itemId = event.node.dataset.itemId
-		emitListChange('removeCheckbox', editKey(), categoryId(), itemId)
+	component.on('removeCheckbox', function() {
+		emitItemChange('removeCheckbox')
 	})
 
 	component.on('editItem', function(event) {
-		component.set(event.keypath + '.editingItem', true)
+		component.set('editingItem', true)
 	})
 
-	component.on('saveItem', function(event) {
-		var item = event.context
-		emitListChange('editItem', editKey, item.id, item)
-		component.set(event.keypath + '.editingItem', false)
+	component.on('saveItem', function(event, name, url) {
+		console.log('got', name, url)
+		emitItemChange('editItem', {
+			item: {
+				name: name,
+				url: url
+			}
+		})
+		component.set('editingItem', false)
 	})
 
 	component.on('checkboxClicked', function(event) {
 		var checkbox = event.context
 		var checked = event.node.checked
-		var itemId = event.node.dataset.itemId
 		var name = component.get('currentName')
 
-		emitListChange(checked ? 'check' : 'uncheck', categoryId(), itemId, checkbox.id, name)
+		emitItemChange(checked ? 'check' : 'uncheck', { checkboxId: checkbox.id, name: name })
 	})
 }
