@@ -26,7 +26,7 @@ function createNewList() {
 	return {
 		id: uuid(),
 		editKey: uuid(),
-		categories: [ createNewCategory('Dummy name') ],
+		categories: [ createNewCategory('Default category') ],
 		other: {},
 		version: 0
 	}
