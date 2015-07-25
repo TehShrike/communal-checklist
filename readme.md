@@ -17,5 +17,4 @@ npm run start
 - support deleting categories
 - add a note about why you should only share the "share" link
 - update the animated gifs
-- logo on home page and in places
 - store seen lists in localstorage

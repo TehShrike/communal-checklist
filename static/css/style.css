@@ -47,8 +47,16 @@ table .checkbox {
 	margin-bottom: 20px;
 }
 
+.margin-top-40 {
+	margin-top: 40px;
+}
+
 .margin-top-30 {
 	margin-top: 30px;
+}
+
+.margin-top-20 {
+	margin-top: 20px;
 }
 
 .margin-top-0 {
@@ -89,4 +97,8 @@ td.col-checkboxes input[type="checkbox"][disabled] {
 }
 .navbar-brand-logo {
 	padding-top: 2px;
+}
+
+.home-logo {
+	width: 100px;
 }

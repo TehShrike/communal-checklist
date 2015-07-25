@@ -1,22 +1,25 @@
-<div class="container">
+<div class="container margin-bottom-20 home-container">
 	<div class="row">
-		<div class="col-xs-offset-3 col-xs-6">
+		<div class="col-xs-offset-5 col-xs-2 col-md-offset-1 col-md-2">
+			<img class="home-logo margin-top-40" src="images/logo-blue.svg" alt="Turtle logo">
+		</div>
+		<div class="col-xs-12 col-md-6">
 			<div class="page-header">
-				<h1>Welcome!</h1>
+				<h1>Communal Checklist</h1>
 				<p class="lead">
-					This site lets you create checklists that other people can check off.
+					Create a checklist, share a link with your friends, and they can check items off the list.
 				</p>
 			</div>
 		</div>
 	</div>
 	<div class="row">
-		<div class="col-xs-12 text-align-center">
+		<div class="col-xs-12 col-md-offset-1 col-md-10 text-align-center margin-bottom-20">
 			<button class="btn btn-primary btn-lg" on-click="createList">
 				Create a new list
 			</button>
 		</div>
 
-		<div class="col-xs-offset-3 col-xs-6">
+		<div class="col-xs-12 col-md-offset-3 col-md-6">
 			{{#error}}
 			<div class="alert alert-danger">
 				{{error}}
@@ -26,31 +29,42 @@
 	</div>
 
 	<div class="row">
-		<div class="col-xs-offset-1 col-xs-10">
+		<div class="col-xs-12 col-md-offset-1 col-md-10 col-lg-offset-3 col-lg-6">
 			<h2>Why?</h2>
 			<p>
-				My wife wanted an informal gift registry that wasn't tied to a particular outlet.  All the options that she found were lame in some way.
+				My wife wanted an informal gift registry that worked with any shopping outlet.  All the other options sucked.
 			</p>
-			<h2>How</h2>
+			<h2>What you do</h2>
 			<ol>
-				<li>Click the big button above to create a new list</li>
-				<li>Type in a name for your list</li>
-				<li>Add your list items</li>
+				<li>Click the big button above</li>
+				<li>Name your list</li>
+				<li>Add categories to your list (optional)</li>
+				<li>Add items to your list</li>
+				<li>Edit items to add links to your preferred online stores</li>
 				<li>Add more checkboxes to the items (in case you want six pairs of socks or something, so that different people can check as many of the checkboxes as they bought)</li>
-				<li>If you want, you can edit the items to add a link to an online listing of the item you have in mind</li>
-				<li>Copy the "share" link to send to your friends</li>
-				<li>Bookmark the current page so that you can get back to the list and be able to edit it later if you need to</li>
+				<li>Send the "share" link to your friends</li>
+				<li>Bookmark the page so that you can edit your list later</li>
 			</ol>
 			<h2>Example of creating a list</h2>
 			<img src="images/creating-a-list.gif" alt="An animated gif showing a list being created" class="gif-screenshot">
 			<h2>Example of somebody getting linked to a list</h2>
 			<img src="images/editing-a-list.gif" alt="An animated gif showing what it looks like when other people edit your list" class="gif-screenshot">
 			<h2>Anything else?</h2>
-			<ul>
-				<li>Anyone with the long URL can edit everything about the list</li>
-				<li>The checkboxes aren't permission controlled - they are associated with the name that people typed in, but that's only there to help people remember what they checked before - if you type in someone else's name, you'll be able to uncheck whatever they checked</li>
-				<li>If you have any questions, want to run the server yourself, or want to discuss a feature, <a href="https://github.com/TehShrike/communal-checklist">check out the project on Github</a> - the whole thing's open source</li>
-			</ul>
+			<p>
+				The code to this site is free on the internet if you want to launch your own version.  <a href="https://github.com/TehShrike/communal-checklist">View the source code on Github</a>
+			</p>
+			<p>
+				If you find any problems or have any questions, <a href="https://github.com/TehShrike/communal-checklist/issues">open an issue on Github</a> or <a href="https://twitter.com/TehShrike">ping me on Twitter.</a>
+			</p>
+		</div>
+	</div>
+</div>
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-xs-12">
+			<p class="pull-right">
+				<a href="http://joshduff.com/">Josh Duff</a> made this
+			</p>
 		</div>
 	</div>
 </div>
