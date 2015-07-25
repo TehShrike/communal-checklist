@@ -7,10 +7,11 @@ var paragraphs = Ractive.extend({
 	isolated: true,
 	oninit: function() {
 		var component = this
-		var text = component.get('text')
-		component.set('paragraphs', text.split(/\n+/).filter(function(str) {
-			return !str.match(/^\s*$/)
-		}))
+		component.observe('text', function(text) {
+			component.set('paragraphs', text.split(/\n+/).filter(function(str) {
+				return !str.match(/^\s*$/)
+			}))
+		})
 	},
 	last: function(n) {
 		return n == component.get('paragraphs').length - 1
