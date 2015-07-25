@@ -1,10 +1,9 @@
 <tr>
 	<td class="col-edit">
 		{{#if editingItem}}
-
 			<button
 					class="btn btn-primary btn-xs margin-top-minus-5"
-					on-click="saveItem">
+					on-click="saveItem:{{name}},{{url}}">
 				Save
 			</button>
 		{{else}}
@@ -17,10 +16,13 @@
 	</td>
 	<td>
 		{{#if editingItem}}
-			<div class="margin-bottom-minus-5 margin-top-minus-5">
-				<input type="text" on-change="saveItem:{{name}},{{url}}" value="{{name}}" placeholder="Do cool thing">
-				<input type="text" on-change="saveItem:{{name}},{{url}}" value="{{url}}" placeholder="http://amazon.com/butts">
-			</div>
+			<form on-submit="saveItem:{{name}},{{url}}">
+				<div class="margin-bottom-minus-5 margin-top-minus-5">
+					<input type="text" value="{{name}}" class="item-name" placeholder="Do cool thing">
+					<input type="text" value="{{url}}" placeholder="http://amazon.com/butts">
+					<button type="submit" style="display:none">Hidden submit button that makes browsers actually do things when you hit enter</button>
+				</div>
+			</form>
 		{{else}}
 			{{#url}}
 				<a href="{{url}}" target="_blank">{{name}}</a>

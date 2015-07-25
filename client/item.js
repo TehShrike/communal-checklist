@@ -29,6 +29,7 @@ function handleItemComponent(component) {
 
 	component.on('editItem', function(event) {
 		component.set('editingItem', true)
+		component.find('.item-name').focus()
 	})
 
 	component.on('removeItem', function() {
@@ -37,7 +38,6 @@ function handleItemComponent(component) {
 	})
 
 	component.on('saveItem', function(event, name, url) {
-		console.log('got', name, url)
 		emitItemChange('editItem', {
 			item: {
 				name: name,
@@ -45,6 +45,8 @@ function handleItemComponent(component) {
 			}
 		})
 		component.set('editingItem', false)
+
+		return false
 	})
 
 	component.on('checkboxClicked', function(event) {
