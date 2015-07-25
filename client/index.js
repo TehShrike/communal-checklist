@@ -5,7 +5,11 @@ require('ractive').DEBUG = false
 
 router.add('/home', home)
 
-router.add('/list/:listId/:editKey?', function(parameters) {
+router.add('/list/:listId', function(parameters) {
+	list(parameters.listId)
+})
+
+router.add('/list/:editKey/:listId', function(parameters) {
 	list(parameters.listId, parameters.editKey)
 })
 

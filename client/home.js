@@ -14,7 +14,7 @@ module.exports = function() {
 			if (err) {
 				ractive.set('error', err.message)
 			} else {
-				router.go('/list/' + list.id + '/' + list.editKey)
+				router.go('/list/' + list.editKey + '/' + list.id)
 			}
 		})
 	})
