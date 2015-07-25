@@ -2,11 +2,17 @@ var Ractive = require('ractive')
 var extend = require('xtend')
 var state = require('./client-state')
 var template = require('fs').readFileSync('client/item.html', { encoding: 'utf8' })
+var urlIsValid = require('is-url-superb')
+var createAffiliateFunction = require('add-affiliate-querystring')
 
 module.exports = Ractive.extend({
 	template: template,
 	oninit: function() {
 		handleItemComponent(this)
+	},
+	data: {
+		makeAffiliateLink: createAffiliateFunction('amazon.com', 'tag', 'josduf-20'),
+		urlIsValid: urlIsValid
 	}
 })
 

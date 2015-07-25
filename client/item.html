@@ -26,11 +26,11 @@
 				</div>
 			</form>
 		{{else}}
-			{{#url}}
-				<a href="{{url}}" target="_blank">{{name}}</a>
+			{{#if urlIsValid(url)}}
+				<a href="{{makeAffiliateLink(url)}}" target="_blank">{{name}}</a>
 			{{else}}
 				{{name}}
-			{{/url}}
+			{{/if}}
 		{{/if}}
 	</td>
 	<td class="col-checkboxes">
