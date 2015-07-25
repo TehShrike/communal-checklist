@@ -99,7 +99,9 @@
 		</div>
 
 		{{#categories}}
-			<category categoryId="{{categoryId}}"></category>
+			{{#if items.length > 0 || canEdit}}
+			<category></category>
+			{{/if}}
 		{{/categories}}
 
 	{{/list}}
