@@ -39,14 +39,23 @@
 					<label class="control-label">
 						Enter your name to remember which checks are yours
 					</label>
-					<input type="text" class="current-name form-control" on-change="changeUserName" value="{{currentName}}">
+					<input type="text"
+							class="current-name form-control"
+							on-change="changeUserName"
+							title="Typing in your name lets you can tell the difference between the stuff you checked and the stuff other folks checked"
+							value="{{currentName}}">
 				</div>
 			</div>
 
 			<div class="col-xs-4">
 				<div>
 					<label class="control-label">Share:</label>
-					<input type="text" class="form-control" decorator="selectOnFocus" value="{{shareUrl}}" readonly>
+					<input type="text"
+							class="form-control"
+							decorator="selectOnFocus"
+							value="{{shareUrl}}"
+							title="Send this link to your friends - if you send them the link in the url bar, they'll be able to edit everything"
+							readonly>
 				</div>
 			</div>
 		</div>
