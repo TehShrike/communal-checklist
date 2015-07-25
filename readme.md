@@ -14,8 +14,7 @@ npm run start
 
 ## To do
 
-- support deleting Categories
-- adding a new category should scroll you down so you can see it
+- support deleting categories
 - add a note about why you should only share the "share" link
 - update the animated gifs
 - logo on home page and in places

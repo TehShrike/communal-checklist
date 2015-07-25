@@ -35,13 +35,15 @@ module.exports = function(listId, editKey) {
 			ractive.set('error', err)
 		}
 
+		// console.log('got back', list)
+
 		// Concurrency errors send back a correct copy of the list
 		if (list) {
 			handleList(ractive, list)
 		}
 	}
 
-	function emitListChange(key, object) {
+	function emitListChange(key, object, cb) {
 		ractive.set('error', null)
 		ractive.set('warning', null)
 
@@ -55,7 +57,12 @@ module.exports = function(listId, editKey) {
 			listId: listId,
 			editKey: editKey,
 			version: ractive.get('list.version')
-		}, object), handleErrorOrList)
+		}, object), function(err, list) {
+			handleErrorOrList(err, list)
+			if (!err && cb) {
+				cb(list)
+			}
+		})
 	}
 
 	var ractive = new Ractive({
@@ -93,9 +100,15 @@ module.exports = function(listId, editKey) {
 		},
 		saveNewCategory: function(name) {
 			var ractive = this
-			ractive.set('addingCategory', false)
+			ractive.set({
+				newCategoryName: '',
+				addingCategory: false
+			})
+
 			if (name) {
-				emitListChange('newCategory', { name: name })
+				emitListChange('newCategory', { name: name }, function() {
+					scrollToLastCategory(ractive)
+				})
 			}
 		}
 	})
@@ -139,5 +152,17 @@ function beginEditingName(ractive) {
 	if (ractive.get('canEdit')) {
 		ractive.set('editingName', true)
 		ractive.find('input.listName').select()
+	}
+}
+
+function scrollToLastCategory(ractive) {
+	var categories = ractive.findAll('.category-row')
+
+	if (categories.length > 0) {
+		var category = categories[categories.length - 1]
+		category.scrollIntoView()
+
+		var inputs = ractive.findAll('input[type="text"]')
+		inputs[inputs.length - 1].focus()
 	}
 }
