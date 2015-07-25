@@ -31,6 +31,11 @@ function handleItemComponent(component) {
 		component.set('editingItem', true)
 	})
 
+	component.on('removeItem', function() {
+		component.set('editingItem', false)
+		emitItemChange('removeItem')
+	})
+
 	component.on('saveItem', function(event, name, url) {
 		console.log('got', name, url)
 		emitItemChange('editItem', {

@@ -14,7 +14,6 @@ npm run start
 
 ## To do
 
-- bug: can't delete list items
 - Make the editing-list-item-details ux not suck by trying to auto-save when you kill focus on one of the two items (support hitting enter instead)
 - bug: when clicking the "Save" button while editing list items, the name disappears
     - this seems to only happen if no changes occurred to the name
