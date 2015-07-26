@@ -14,7 +14,6 @@ npm run start
 
 ## To do
 
-- support deleting categories
-- add a note about why you should only share the "share" link
-- update the animated gifs
+- allow reordering of items
 - store seen lists in localstorage
+- support deleting categories
