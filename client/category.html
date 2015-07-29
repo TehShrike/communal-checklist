@@ -23,13 +23,19 @@
 	</div>
 	<div class="col-lg-offset-2 col-lg-8 col-md-offset-1 col-md-10 col-xs-12">
 		{{#if editingCategoryDescription}}
-			<textarea
-					class="form-control categoryDescription"
-					on-blur="categoryDescriptionChange"
-					on-change="categoryDescriptionChange"
-					value="{{description}}"
-					placeholder="Check out these awesome things!">
-			</textarea>
+			<div class="margin-bottom-10">
+				<textarea
+						class="form-control categoryDescription"
+						on-blur="categoryDescriptionChange"
+						on-change="categoryDescriptionChange"
+						value="{{description}}"
+						rows="4"
+						placeholder="Check out these awesome things!">
+				</textarea>
+			</div>
+			<button class="btn btn-primary pull-right" on-click="categoryDescriptionChange">
+				Save
+			</button>
 		{{elseif canEdit}}
 			<div on-click="startEditingCategoryDescription">
 				<paragraphs text="{{description || 'Category description...'}}">
