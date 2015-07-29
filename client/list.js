@@ -72,7 +72,7 @@ module.exports = function(listId, editKey) {
 			canEdit: !!editKey,
 			currentName: 'Anonymous',
 			newItemName: '',
-			shareUrl: window.location.origin + window.location.pathname + '#/list/' + listId,
+			shareUrl: everythingBeforeTheHash(window.location.href) + '#/list/' + listId,
 			emitListChange: emitListChange,
 			editKey: editKey
 		},
@@ -165,4 +165,9 @@ function scrollToLastCategory(ractive) {
 		var inputs = ractive.findAll('input[type="text"]')
 		inputs[inputs.length - 1].focus()
 	}
+}
+
+function everythingBeforeTheHash(url) {
+	var hashIndex = url.indexOf('#')
+	return hashIndex === -1 ? url : url.substring(0, hashIndex)
 }
