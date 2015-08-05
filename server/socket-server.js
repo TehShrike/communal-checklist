@@ -92,12 +92,6 @@ function cbFn(cb) {
 	return typeof cb === 'function' ? cb : noop
 }
 
-function newError(message, type) {
-	var err = new Error(message)
-	err[type] = true
-	return err
-}
-
 function getAndSave(listId, version, changerFn, cb) {
 	listMutexes.get(listId).writeLock(function(release) {
 		cb = cbFn(cb)
@@ -292,30 +286,6 @@ function getList(listId, cb) {
 			}
 		})
 	})
-}
-
-function addAnotherCallback(args, withThisCallback) {
-	args = args.slice()
-	var originalCallback = args[args.length - 1]
-
-	function callbackToPassIn() {
-		try {
-			withThisCallback.apply(null, arguments)
-		} catch (e) {
-			console.error(e)
-		}
-		if (typeof originalCallback === 'function') {
-			originalCallback.apply(null, arguments)
-		}
-	}
-
-	if (typeof originalCallback === 'function') {
-		args[args.length - 1] = callbackToPassIn
-	} else {
-		args.push(callbackToPassIn)
-	}
-
-	return args
 }
 
 function returnSocketEventHandler(socket, fn) {
