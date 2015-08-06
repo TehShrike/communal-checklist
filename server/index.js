@@ -8,7 +8,8 @@ function makeServer() {
 	var server = http.createServer(
 		ecstatic({
 			root: path.resolve(__dirname, '../static'),
-			cache: 0
+			cache: 0,
+			gzip: true
 		})
 	)
 

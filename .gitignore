@@ -1,1 +1,4 @@
 node_modules
+*.gz
+build.js
+leveldb-storage
