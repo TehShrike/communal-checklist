@@ -84,13 +84,10 @@ module.exports = function(listId, editKey) {
 		},
 		changeUserName: function() {
 			var ractive = this
+
 			var name = ractive.get('currentName')
-			var metadata = ractive.get('list.other')
-			metadata.name = name
 
 			db.put('currentName', name)
-
-			emitListChange('overwriteListMetadata', { other: metadata })
 		},
 		saveListNameChange: function() {
 			var ractive = this
