@@ -35,7 +35,7 @@
     "ecstatic": "^0.8.0",
     "hash-brown-router": "^1.4.0",
     "is-url-superb": "^2.0.0",
-    "key-master": "^1.1.0",
+    "key-master": "^2.0.1",
     "leveldown": "^1.3.0",
     "levelup": "^1.2.1",
     "localstorage-down": "^0.6.3",
