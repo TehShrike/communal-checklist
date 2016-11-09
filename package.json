@@ -23,7 +23,7 @@
   "homepage": "https://github.com/TehShrike/communal-checklist#readme",
   "devDependencies": {
     "level-mem": "^0.18.0",
-    "ngzip": "^1.0.0",
+    "ngzip": "^1.1.3",
     "watchify": "^3.2.3"
   },
   "dependencies": {
