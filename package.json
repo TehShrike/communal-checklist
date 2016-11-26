@@ -9,7 +9,8 @@
     "compile": "browserify client/index.js -t brfs | uglifyjs -m > static/build.js",
     "build": "npm run compile; npm run compress",
     "start": "node server.js",
-    "compress": "cat static/browserconfig.xml | ngzip -9 > static/browserconfig.xml.gz; cat static/build.js | ngzip -9 > static/build.js.gz; cat static/favicon.ico | ngzip -9 > static/favicon.ico.gz; cat static/index.html | ngzip -9 > static/index.html.gz; cat static/manifest.json | ngzip -9 > static/manifest.json.gz; cat static/css/bootstrap.min.css | ngzip -9 > static/css/bootstrap.min.css.gz; cat static/css/font-awesome.min.css | ngzip -9 > static/css/font-awesome.min.css.gz; cat static/css/style.css | ngzip -9 > static/css/style.css.gz; cat static/fonts/FontAwesome.otf | ngzip -9 > static/fonts/FontAwesome.otf.gz; cat static/fonts/fontawesome-webfont.svg | ngzip -9 > static/fonts/fontawesome-webfont.svg.gz; cat static/fonts/fontawesome-webfont.ttf | ngzip -9 > static/fonts/fontawesome-webfont.ttf.gz; cat static/css/source-sans-pro.css | ngzip -9 > static/css/source-sans-pro.css.gz; cat static/images/creating-a-list.gif | ngzip -9 > static/images/creating-a-list.gif.gz;"
+    "compress": "cat static/browserconfig.xml | ngzip -9 > static/browserconfig.xml.gz; cat static/build.js | ngzip -9 > static/build.js.gz; cat static/favicon.ico | ngzip -9 > static/favicon.ico.gz; cat static/index.html | ngzip -9 > static/index.html.gz; cat static/manifest.json | ngzip -9 > static/manifest.json.gz; cat static/css/bootstrap.min.css | ngzip -9 > static/css/bootstrap.min.css.gz; cat static/css/font-awesome.min.css | ngzip -9 > static/css/font-awesome.min.css.gz; cat static/css/style.css | ngzip -9 > static/css/style.css.gz; cat static/fonts/FontAwesome.otf | ngzip -9 > static/fonts/FontAwesome.otf.gz; cat static/fonts/fontawesome-webfont.svg | ngzip -9 > static/fonts/fontawesome-webfont.svg.gz; cat static/fonts/fontawesome-webfont.ttf | ngzip -9 > static/fonts/fontawesome-webfont.ttf.gz; cat static/css/source-sans-pro.css | ngzip -9 > static/css/source-sans-pro.css.gz; cat static/images/creating-a-list.gif | ngzip -9 > static/images/creating-a-list.gif.gz;",
+    "build-dumper": "browserify --no-builtins -t [ babelify --presets [ es2015 ] ] ./dump-data.js -o ./dump-data-es5.js"
   },
   "repository": {
     "type": "git",
@@ -22,8 +23,12 @@
   },
   "homepage": "https://github.com/TehShrike/communal-checklist#readme",
   "devDependencies": {
+    "babel-preset-es2015": "6.14.0",
+    "babelify": "7.3.0",
+    "browserify": "13.1.0",
     "level-mem": "^0.18.0",
     "ngzip": "^1.0.0",
+    "sql-tagged-template-literal": "1.0.1",
     "watchify": "^3.2.3"
   },
   "dependencies": {
@@ -31,7 +36,6 @@
     "array.prototype.find": "^1.0.0",
     "array.prototype.findindex": "^1.0.0",
     "brfs": "^1.4.0",
-    "browserify": "^10.2.4",
     "ecstatic": "^0.8.0",
     "hash-brown-router": "^1.4.0",
     "is-url-superb": "^2.0.0",
@@ -39,6 +43,7 @@
     "leveldown": "^1.3.0",
     "levelup": "^1.2.1",
     "localstorage-down": "^0.6.3",
+    "mysql": "2.11.1",
     "ractive": "^0.7.3",
     "ractive-select-on-focus": "^1.0.0",
     "random-uuid-v4": "0.0.5",
@@ -46,6 +51,7 @@
     "shallow-copy": "0.0.1",
     "socket.io": "^1.3.5",
     "socket.io-client": "^1.3.5",
+    "sql-concat": "1.3.0",
     "uglifyjs": "^2.4.10",
     "xtend": "^4.0.0"
   }
