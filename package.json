@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "add-affiliate-querystring": "^1.0.2",
-    "array.prototype.find": "^1.0.0",
+    "array.prototype.find": "^2.0.1",
     "array.prototype.findindex": "^1.0.0",
     "brfs": "^1.4.0",
     "browserify": "^10.2.4",
