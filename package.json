@@ -31,7 +31,7 @@
     "array.prototype.find": "^2.0.3",
     "array.prototype.findindex": "^1.0.0",
     "brfs": "^1.4.0",
-    "browserify": "^10.2.4",
+    "browserify": "^13.1.1",
     "ecstatic": "^0.8.0",
     "hash-brown-router": "^1.4.0",
     "is-url-superb": "^2.0.0",
