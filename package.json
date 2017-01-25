@@ -24,7 +24,7 @@
   "devDependencies": {
     "level-mem": "^0.18.0",
     "ngzip": "^1.0.0",
-    "watchify": "^3.2.3"
+    "watchify": "^3.9.0"
   },
   "dependencies": {
     "add-affiliate-querystring": "^1.0.2",
